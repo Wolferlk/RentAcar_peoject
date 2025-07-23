@@ -35,30 +35,31 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert('Error', 'Please enter your email and password');
       return;
     }
 
     setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    setTimeout(() => {
-      const mockUser = {
-        id: '1',
+      // Mock user data
+      const userData = {
+        id: '123',
+        name: 'John Doe',
         email,
-        name: email.split('@')[0],
-        phone: '+1-555-0123',
+        type: userType,
       };
 
-      setUser(mockUser);
+      setUser(userData);
       setStoreUserType(userType);
+      router.push('/home');
+    } catch (error) {
+      Alert.alert('Login Failed', 'Please check your credentials and try again.');
+    } finally {
       setIsLoading(false);
-
-      if (userType === 'owner') {
-        router.replace('/(tabs)/dashboard');
-      } else {
-        router.replace('/(tabs)/');
-      }
-    }, 1000);
+    }
   };
 
   const handlePressIn = () => {
