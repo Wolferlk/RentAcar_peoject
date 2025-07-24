@@ -1,11 +1,14 @@
-import React from "react";
+import type React from "react"
+import { useState } from "react"
+import { Users, Calendar, DollarSign, AlertCircle, Eye, Edit, Trash2, MoreHorizontal, Car } from "lucide-react"
 
 const dummyData = {
   totalUsers: 120,
   totalBookings: 75,
   totalRevenue: 15800,
   pendingVerifications: 8,
-};
+  totalVehicles: 45,
+}
 
 const userAccounts = [
   {
@@ -44,16 +47,52 @@ const userAccounts = [
     location: "Gotham",
     status: "delete",
   },
+  
+]
+
+const vehicles = [
   {
-    id: "U005",
-    fullName: "Clark Kent",
-    email: "clark@example.com",
-    role: "customer",
-    joinedDate: "2024-04-08",
-    location: "Metropolis",
-    status: "verify",
+    id: "V001",
+    owner: "John Smith",
+    vehicleName: "Toyota Prius 2023",
+    brand: "Toyota",
+    vehicleType: "Sedan",
+    noOfSeats: 5,
+    fuelType: "Hybrid",
+    status: "available",
   },
-];
+  {
+    id: "V002",
+    owner: "Sarah Lee",
+    vehicleName: "Honda Civic LX",
+    brand: "Honda",
+    vehicleType: "Sedan",
+    noOfSeats: 5,
+    fuelType: "Gasoline",
+    status: "rented",
+  },
+  {
+    id: "V003",
+    owner: "Michael Ray",
+    vehicleName: "Tesla Model 3",
+    brand: "Tesla",
+    vehicleType: "Sedan",
+    noOfSeats: 5,
+    fuelType: "Electric",
+    status: "available",
+  },
+  {
+    id: "V004",
+    owner: "James Dean",
+    vehicleName: "Ford Ranger XLT",
+    brand: "Ford",
+    vehicleType: "Pickup Truck",
+    noOfSeats: 5,
+    fuelType: "Gasoline",
+    status: "maintenance",
+  },
+ 
+]
 
 const recentBookings = [
   {
@@ -101,68 +140,348 @@ const recentBookings = [
     price: 300,
     bookedBy: "Clark Kent",
   },
-];
+]
+
+interface DropdownMenuProps {
+  children: React.ReactNode
+  onAction: (action: string) => void
+}
+
+const DropdownMenu: React.FC<DropdownMenuProps> = ({ children, onAction }) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div className="relative">
+      <button onClick={() => setIsOpen(!isOpen)} className="p-2 hover:bg-gray-100 rounded-md transition-colors">
+        <MoreHorizontal className="h-5 w-5" />
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+            <div className="py-1">
+              <div className="px-3 py-2 text-base font-medium text-gray-900 border-b border-gray-100">Actions</div>{" "}
+              <button
+                onClick={() => {
+                  onAction("view")
+                  setIsOpen(false)
+                }}
+                className="flex items-center w-full px-3 py-2 text-base text-gray-700 hover:bg-gray-100 transition-colors" 
+              >
+                <Eye className="mr-2 h-5 w-5" /> 
+                View Details
+              </button>
+              <button
+                onClick={() => {
+                  onAction("edit")
+                  setIsOpen(false)
+                }}
+                className="flex items-center w-full px-3 py-2 text-base text-gray-700 hover:bg-gray-100 transition-colors" 
+              >
+                <Edit className="mr-2 h-5 w-5" /> 
+                Edit
+              </button>
+              <div className="border-t border-gray-100 my-1" />
+              <button
+                onClick={() => {
+                  onAction("delete")
+                  setIsOpen(false)
+                }}
+                className="flex items-center w-full px-3 py-2 text-base text-red-600 hover:bg-red-50 transition-colors" 
+              >
+                <Trash2 className="mr-2 h-5 w-5" /> 
+                Delete
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+const getStatusStyles = (status: string) => {
+  switch (status) {
+    case "verify":
+    case "available":
+      return "bg-green-100 text-green-800 border-green-200"
+    case "suspend":
+    case "maintenance":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200"
+    case "delete":
+      return "bg-red-100 text-red-800 border-red-200"
+    case "rented":
+      return "bg-blue-100 text-blue-800 border-blue-200"
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200"
+  }
+}
+
+const getFuelTypeColor = (fuelType: string) => {
+  switch (fuelType.toLowerCase()) {
+    case "electric":
+      return "bg-green-100 text-green-800 border-green-200"
+    case "hybrid":
+      return "bg-blue-100 text-blue-800 border-blue-200"
+    case "gasoline":
+      return "bg-gray-100 text-gray-800 border-gray-200"
+    case "diesel":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200"
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200"
+  }
+}
 
 const AdminDashboard: React.FC = () => {
+  const handleUserAction = (action: string, userId: string) => {
+    console.log(`${action} action for user ${userId}`)
+    // Implement your action logic here
+  }
+
+  const handleBookingAction = (action: string, bookingId: string) => {
+    console.log(`${action} action for booking ${bookingId}`)
+    // Implement your action logic here
+  }
+
+  const handleVehicleAction = (action: string, vehicleId: string) => {
+    console.log(`${action} action for vehicle ${vehicleId}`)
+    // Implement your action logic here
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+    <div className="flex-1 space-y-6 p-6 bg-gray-50">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900">Dashboard</h1>{" "}
+          <p className="text-lg text-gray-600 mt-1">Welcome back! Here's what's happening with your rental platform.</p>{" "}
+        </div>
+      </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h2 className="text-lg font-semibold text-gray-600">Total Users</h2>
-          <p className="text-3xl font-bold text-blue-600">{dummyData.totalUsers}</p>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        {/* Total Users Card */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-base font-medium text-gray-600">Total Users</p> 
+              <p className="text-3xl font-bold text-blue-600 mt-2">{dummyData.totalUsers}</p>{" "}
+              <p className="text-sm text-gray-500 mt-1">+12% from last month</p> 
+            </div>
+            <div className="p-3 bg-blue-50 rounded-full">
+              <Users className="h-7 w-7 text-blue-600" /> 
+            </div>
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h2 className="text-lg font-semibold text-gray-600">Bookings</h2>
-          <p className="text-3xl font-bold text-green-600">{dummyData.totalBookings}</p>
+
+        {/* Total Vehicles Card */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-base font-medium text-gray-600">Total Vehicles</p>{" "}
+              <p className="text-3xl font-bold text-purple-600 mt-2">{dummyData.totalVehicles}</p>{" "}
+              <p className="text-sm text-gray-500 mt-1">+5% from last month</p> 
+            </div>
+            <div className="p-3 bg-purple-50 rounded-full">
+              <Car className="h-7 w-7 text-purple-600" /> 
+            </div>
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h2 className="text-lg font-semibold text-gray-600">Revenue</h2>
-          <p className="text-3xl font-bold text-yellow-600">${dummyData.totalRevenue}</p>
+
+        {/* Total Bookings Card */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-base font-medium text-gray-600">Total Bookings</p>{" "}
+              <p className="text-3xl font-bold text-green-600 mt-2">{dummyData.totalBookings}</p>{" "}
+              <p className="text-sm text-gray-500 mt-1">+8% from last month</p> 
+            </div>
+            <div className="p-3 bg-green-50 rounded-full">
+              <Calendar className="h-7 w-7 text-green-600" /> 
+            </div>
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h2 className="text-lg font-semibold text-gray-600">Pending Verifications</h2>
-          <p className="text-3xl font-bold text-red-600">{dummyData.pendingVerifications}</p>
+
+        {/* Total Revenue Card */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-base font-medium text-gray-600">Total Revenue</p>{" "}
+              <p className="text-3xl font-bold text-yellow-600 mt-2">${dummyData.totalRevenue.toLocaleString()}</p>{" "}
+              <p className="text-sm text-gray-500 mt-1">+15% from last month</p> 
+            </div>
+            <div className="p-3 bg-yellow-50 rounded-full">
+              <DollarSign className="h-7 w-7 text-yellow-600" /> 
+            </div>
+          </div>
+        </div>
+
+        {/* Pending Verifications Card */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-base font-medium text-gray-600">Pending Verifications</p>{" "}
+              <p className="text-3xl font-bold text-red-600 mt-2">{dummyData.pendingVerifications}</p>{" "}
+              <p className="text-sm text-gray-500 mt-1">Requires attention</p> 
+            </div>
+            <div className="p-3 bg-red-50 rounded-full">
+              <AlertCircle className="h-7 w-7 text-red-600" /> 
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Vehicles Table */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Vehicle Fleet</h2>{" "}
+              <p className="text-base text-gray-600 mt-1">Manage and monitor all vehicles in your rental fleet</p>{" "}
+            </div>
+            <button className="px-4 py-2 bg-purple-600 text-white text-base font-medium rounded-md hover:bg-purple-700 transition-colors">{" "}
+              View All Vehicles
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                  Owner
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                  Vehicle Name
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                  Brand
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                  Vehicle Type
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">{" "}
+                  No of Seats
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">{" "}
+                  Fuel Type
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">{" "}
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-12"></th>{" "}
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {vehicles.map((vehicle) => (
+                <tr key={vehicle.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base font-medium text-gray-900">{vehicle.owner}</div>{" "}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base text-gray-900">{vehicle.vehicleName}</div>{" "}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200"> {" "}
+                      {vehicle.brand}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600">{vehicle.vehicleType}</td>{" "}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base text-gray-900 text-center">{vehicle.noOfSeats}</div>{" "}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border ${getFuelTypeColor(vehicle.fuelType)}`} /* INCREASED: text-xs → text-sm */
+                    >
+                      {vehicle.fuelType}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize ${getStatusStyles(vehicle.status)}`} /* INCREASED: text-xs → text-sm */
+                    >
+                      {vehicle.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium"> {" "}
+                    <DropdownMenu onAction={(action) => handleVehicleAction(action, vehicle.id)}>
+                      <div />
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
       {/* User Accounts Table */}
-      <div className="bg-white rounded-xl shadow-md p-6 mb-10">
-        <h2 className="text-xl font-semibold mb-4">User Accounts</h2>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">User Accounts</h2>{" "}
+              <p className="text-base text-gray-600 mt-1">Manage and monitor user accounts across your platform</p>{" "}
+            </div>
+            <button className="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md hover:bg-blue-700 transition-colors">{" "}
+              View All Users
+            </button>
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border-collapse text-sm">
-            <thead>
-              <tr className="bg-gray-200 text-left text-gray-600">
-                <th className="px-4 py-2 border-b">Full Name</th>
-                <th className="px-4 py-2 border-b">Email</th>
-                <th className="px-4 py-2 border-b">Role</th>
-                <th className="px-4 py-2 border-b">Joined Date</th>
-                <th className="px-4 py-2 border-b">Location</th>
-                <th className="px-4 py-2 border-b">Status</th>
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Name</th>{" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">{" "}
+                  Email
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Role</th>{" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                  Joined
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">  {" "}
+                  Location
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">  {" "}
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-12"></th>{" "}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white divide-y divide-gray-200">
               {userAccounts.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-100">
-                  <td className="px-4 py-2 border-b">{user.fullName}</td>
-                  <td className="px-4 py-2 border-b">{user.email}</td>
-                  <td className="px-4 py-2 border-b capitalize">{user.role}</td>
-                  <td className="px-4 py-2 border-b">{user.joinedDate}</td>
-                  <td className="px-4 py-2 border-b">{user.location}</td>
-                  <td className="px-4 py-2 border-b">
+                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base font-medium text-gray-900">{user.fullName}</div>{" "}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base text-gray-600">{user.email}</div> 
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200 capitalize">  {" "}
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600"> {" "}
+                    {new Date(user.joinedDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600">{user.location}</td>{" "}
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.status === "verify"
-                          ? "bg-green-100 text-green-700"
-                          : user.status === "suspend"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize ${getStatusStyles(user.status)}`} /* INCREASED: text-xs → text-sm */
                     >
                       {user.status}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium">{" "}
+                    <DropdownMenu onAction={(action) => handleUserAction(action, user.id)}>
+                      <div />
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}
@@ -172,31 +491,71 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Recent Bookings Table */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Recent Bookings</h2>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Recent Bookings</h2>{" "}
+              <p className="text-base text-gray-600 mt-1">Latest booking activities on your platform</p>{" "}
+            </div>
+            <button className="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md hover:bg-blue-700 transition-colors">{" "}
+              View All Bookings
+            </button>
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border-collapse text-sm">
-            <thead>
-              <tr className="bg-gray-200 text-left text-gray-600">
-                <th className="px-4 py-2 border-b">Booking ID</th>
-                <th className="px-4 py-2 border-b">Vehicle</th>
-                <th className="px-4 py-2 border-b">Owner</th>
-                <th className="px-4 py-2 border-b">Start Date</th>
-                <th className="px-4 py-2 border-b">End Date</th>
-                <th className="px-4 py-2 border-b">Price</th>
-                <th className="px-4 py-2 border-b">Booked By</th>
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                  Booking ID
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">  {" "}
+                  Vehicle
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                  Owner
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">  {" "}
+                  Duration
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                  Booked By
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-12"></th>{" "}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white divide-y divide-gray-200">
               {recentBookings.map((booking) => (
-                <tr key={booking.id} className="hover:bg-gray-100">
-                  <td className="px-4 py-2 border-b">{booking.id}</td>
-                  <td className="px-4 py-2 border-b">{booking.vehicleName}</td>
-                  <td className="px-4 py-2 border-b">{booking.owner}</td>
-                  <td className="px-4 py-2 border-b">{booking.startDate}</td>
-                  <td className="px-4 py-2 border-b">{booking.endDate}</td>
-                  <td className="px-4 py-2 border-b">${booking.price}</td>
-                  <td className="px-4 py-2 border-b">{booking.bookedBy}</td>
+                <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base font-medium text-gray-900">{booking.id}</div>{" "}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base text-gray-900">{booking.vehicleName}</div>{" "}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base text-gray-600">{booking.owner}</div>{" "}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base text-gray-900">{new Date(booking.startDate).toLocaleDateString()}</div>{" "}
+                    <div className="text-base text-gray-500">to {new Date(booking.endDate).toLocaleDateString()}</div>{" "}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base font-medium text-gray-900">${booking.price}</div>{" "}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-base text-gray-900">{booking.bookedBy}</div>{" "}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium"> {" "}
+                    <DropdownMenu onAction={(action) => handleBookingAction(action, booking.id)}>
+                      <div />
+                    </DropdownMenu>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -204,7 +563,7 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AdminDashboard;
+export default AdminDashboard
