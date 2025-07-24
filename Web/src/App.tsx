@@ -19,6 +19,7 @@ import HelpPage from './pages/HelpPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import AdminVehicleListingsPage from './pages/AdminVehicleListingsPage';
+import AdminVehicleDetailsPage from './pages/AdminVehicleDetailsPage';
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/admin-vehicle-listings" element={<AdminVehicleListingsPage />} />
+            <Route path="/admin/vehicles/:id" element={<AdminVehicleDetailsPage />} />
           </Routes>
           <Footer />
         </div>
