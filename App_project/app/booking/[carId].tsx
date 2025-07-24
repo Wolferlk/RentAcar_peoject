@@ -8,12 +8,13 @@ import {
   TextInput,
   Alert,
   Image,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  MapPin, 
+import {
+  ArrowLeft,
+  Calendar,
+  MapPin,
   Clock,
   User,
   Phone,
@@ -29,6 +30,7 @@ import Animated, {
   withSpring,
   FadeIn,
 } from 'react-native-reanimated';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function BookingScreen() {
   const { carId } = useLocalSearchParams();
@@ -43,7 +45,13 @@ export default function BookingScreen() {
   const [contactEmail, setContactEmail] = useState(user?.email || '');
   const [isLoading, setIsLoading] = useState(false);
 
-  const car = allCars.find(c => c.id === carId);
+  // Date picker states
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [selectedStartDate, setSelectedStartDate] = useState(new Date());
+  const [selectedEndDate, setSelectedEndDate] = useState(new Date());
+
+  const car = allCars.find((c) => c.id === carId);
   const scaleValue = useSharedValue(1);
 
   if (!car) {
@@ -58,22 +66,38 @@ export default function BookingScreen() {
 
   const calculateTotalPrice = () => {
     if (!startDate || !endDate) return 0;
-    
+
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    
+    const days = Math.ceil(
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (days <= 0) return 0;
+
     let total = days * car.pricePerDay;
     if (withDriver && !car.driverIncluded) {
       total += days * 50; // Additional driver cost
     }
-    
+
     return total;
   };
 
   const handleBooking = async () => {
-    if (!startDate || !endDate || !pickupLocation || !contactName || !contactPhone) {
+    if (
+      !startDate ||
+      !endDate ||
+      !pickupLocation ||
+      !contactName ||
+      !contactPhone
+    ) {
       Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    const totalPrice = calculateTotalPrice();
+    if (totalPrice === 0) {
+      Alert.alert('Error', 'Please select valid dates for your rental period');
       return;
     }
 
@@ -88,7 +112,7 @@ export default function BookingScreen() {
         ownerId: car.ownerId,
         startDate,
         endDate,
-        totalPrice: calculateTotalPrice(),
+        totalPrice,
         status: 'pending' as const,
         pickupLocation,
         dropoffLocation: dropoffLocation || pickupLocation,
@@ -127,53 +151,109 @@ export default function BookingScreen() {
     scaleValue.value = withSpring(1);
   };
 
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const handleStartDateChange = (event: any, selectedDate?: Date) => {
+    setShowStartDatePicker(false);
+    if (selectedDate) {
+      setSelectedStartDate(selectedDate);
+      setStartDate(formatDate(selectedDate));
+
+      // If end date is before start date, reset it
+      if (selectedEndDate <= selectedDate) {
+        const nextDay = new Date(selectedDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+        setSelectedEndDate(nextDay);
+        setEndDate(formatDate(nextDay));
+      }
+    }
+  };
+
+  const handleEndDateChange = (event: any, selectedDate?: Date) => {
+    setShowEndDatePicker(false);
+    if (selectedDate) {
+      setSelectedEndDate(selectedDate);
+      setEndDate(formatDate(selectedDate));
+    }
+  };
+
+  const showStartPicker = () => {
+    setShowStartDatePicker(true);
+  };
+
+  const showEndPicker = () => {
+    setShowEndDatePicker(true);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Animated.View style={styles.header} entering={FadeIn}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <ArrowLeft size={24} color="#1D1D1F" />
           </TouchableOpacity>
-          <Text style={styles.title}>Book Car</Text>
+          <Text style={styles.title}>Book Now</Text>
         </Animated.View>
 
         {/* Car Summary */}
         <Animated.View style={styles.carSummary} entering={FadeIn.delay(200)}>
           <Image source={{ uri: car.image }} style={styles.carImage} />
           <View style={styles.carInfo}>
-            <Text style={styles.carName}>{car.make} {car.model}</Text>
+            <Text style={styles.carName}>
+              {car.make} {car.model}
+            </Text>
             <Text style={styles.carLocation}>{car.location}</Text>
             <Text style={styles.carPrice}>${car.pricePerDay}/day</Text>
           </View>
         </Animated.View>
 
         {/* Booking Form */}
-        <Animated.View style={styles.formContainer} entering={FadeIn.delay(300)}>
+        <Animated.View
+          style={styles.formContainer}
+          entering={FadeIn.delay(300)}
+        >
           {/* Date Selection */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Rental Period</Text>
             <View style={styles.dateRow}>
-              <View style={styles.dateInput}>
+              <TouchableOpacity
+                style={styles.dateInput}
+                onPress={showStartPicker}
+              >
                 <Calendar size={20} color="#8E8E93" />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Start Date"
-                  value={startDate}
-                  onChangeText={setStartDate}
-                  placeholderTextColor="#8E8E93"
-                />
-              </View>
-              <View style={styles.dateInput}>
+                <Text
+                  style={[
+                    styles.dateText,
+                    startDate ? styles.inputFilled : styles.inputPlaceholder,
+                  ]}
+                >
+                  {startDate || 'Start Date'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.dateInput}
+                onPress={showEndPicker}
+              >
                 <Calendar size={20} color="#8E8E93" />
-                <TextInput
-                  style={styles.input}
-                  placeholder="End Date"
-                  value={endDate}
-                  onChangeText={setEndDate}
-                  placeholderTextColor="#8E8E93"
-                />
-              </View>
+                <Text
+                  style={[
+                    styles.dateText,
+                    endDate ? styles.inputFilled : styles.inputPlaceholder,
+                  ]}
+                >
+                  {endDate || 'End Date'}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -217,14 +297,18 @@ export default function BookingScreen() {
                       {car.driverIncluded ? 'Driver Included' : 'Add Driver'}
                     </Text>
                     <Text style={styles.driverOptionSubtitle}>
-                      {car.driverIncluded 
-                        ? 'Professional driver included' 
-                        : '+$50/day for professional driver'
-                      }
+                      {car.driverIncluded
+                        ? 'Professional driver included'
+                        : '+$50/day for professional driver'}
                     </Text>
                   </View>
                 </View>
-                <View style={[styles.checkbox, withDriver && styles.checkboxSelected]}>
+                <View
+                  style={[
+                    styles.checkbox,
+                    withDriver && styles.checkboxSelected,
+                  ]}
+                >
                   {withDriver && <Check size={16} color="#FFFFFF" />}
                 </View>
               </TouchableOpacity>
@@ -302,11 +386,36 @@ export default function BookingScreen() {
           <Animated.View style={animatedStyle}>
             <CreditCard size={20} color="#FFFFFF" />
             <Text style={styles.bookButtonText}>
-              {isLoading ? 'Processing...' : `Book for $${calculateTotalPrice()}`}
+              {isLoading
+                ? 'Processing...'
+                : `Book for $${calculateTotalPrice()}`}
             </Text>
           </Animated.View>
         </TouchableOpacity>
       </Animated.View>
+
+      {/* Date Pickers */}
+      {showStartDatePicker && (
+        <DateTimePicker
+          testID="startDatePicker"
+          value={selectedStartDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          minimumDate={new Date()}
+          onChange={handleStartDateChange}
+        />
+      )}
+
+      {showEndDatePicker && (
+        <DateTimePicker
+          testID="endDatePicker"
+          value={selectedEndDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          minimumDate={selectedStartDate}
+          onChange={handleEndDateChange}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -320,6 +429,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  inputFilled: {
+    color: '#1D1D1F',
+  },
+  inputPlaceholder: {
+    color: '#8E8E93',
   },
   errorText: {
     fontSize: 18,
@@ -350,7 +465,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: 'Poppins-Bold',
-    color: '#1D1D1F',
+    color: '#007AFF',
   },
   carSummary: {
     flexDirection: 'row',
@@ -407,6 +522,7 @@ const styles = StyleSheet.create({
   dateRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 12,
   },
   dateInput: {
     flex: 1,
@@ -416,12 +532,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    marginRight: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+  },
+  dateText: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
   },
   inputContainer: {
     flexDirection: 'row',
