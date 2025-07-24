@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,192 +9,107 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { User, Settings, Calendar, CreditCard, LogOut, ChevronRight, Heart, Bell, Shield, CircleHelp as HelpCircle, Star } from 'lucide-react-native';
-import { useUserStore } from '@/stores/userStore';
-import { router } from 'expo-router';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  FadeIn,
-} from 'react-native-reanimated';
+import { Mail, Phone, MapPin, Pencil } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
-  const { user, userType, logout, bookings } = useUserStore();
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const scaleValue = useSharedValue(1);
+  const user = {
+    name: 'Lucas Scott',
+    username: '@lucasscott3',
+    email: 'lucasscott@gmail.com',
+    phone: '+94 771234567',
+    address: 'No. 45/3, Temple Road Nugegoda',
+    avatar:
+      'https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Ym95fGVufDB8fDB8fHww',
+  };
 
-  const handleLogin = () => {
-    router.push('/auth/login');
+  const rentals = [
+    {
+      car: 'Tesla Model 3',
+      date: '15/12/2024',
+      duration: '3 days',
+      status: 'Completed',
+    },
+    {
+      car: 'BMW i8',
+      date: '20/06/2024',
+      duration: '2 days',
+      status: 'Completed',
+    },
+    {
+      car: 'Audi E-Tron',
+      date: '01/05/2024',
+      duration: '4 days',
+      status: 'Completed',
+    },
+  ];
+
+  const handleEditProfile = () => {
+    router.push('/editProfile/edit-profile');
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          onPress: () => {
-            logout();
-            router.replace('/');
-          }
-        },
-      ]
-    );
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', style: 'destructive', onPress: () => console.log('Logged out') },
+    ]);
   };
-
-  const handlePressIn = () => {
-    scaleValue.value = withSpring(0.95);
-  };
-
-  const handlePressOut = () => {
-    scaleValue.value = withSpring(1);
-  };
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scaleValue.value }],
-    };
-  });
-
-  const MenuItem = ({ icon: Icon, title, onPress, showChevron = true }: any) => (
-    <Animated.View entering={FadeIn.delay(100)}>
-      <TouchableOpacity
-        style={styles.menuItem}
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        activeOpacity={0.9}
-      >
-        <View style={styles.menuItemLeft}>
-          <View style={styles.menuItemIcon}>
-            <Icon size={20} color="#007AFF" />
-          </View>
-          <Text style={styles.menuItemText}>{title}</Text>
-        </View>
-        {showChevron && <ChevronRight size={20} color="#8E8E93" />}
-      </TouchableOpacity>
-    </Animated.View>
-  );
-
-  if (!user) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loginContainer}>
-          <View style={styles.loginIcon}>
-            <User size={60} color="#007AFF" />
-          </View>
-          <Text style={styles.loginTitle}>Welcome to RentACar</Text>
-          <Text style={styles.loginSubtitle}>
-            Sign in to book cars and manage your rentals
-          </Text>
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Sign In</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.registerButton} 
-            onPress={() => router.push('/auth/register')}
-          >
-            <Text style={styles.registerButtonText}>Create Account</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Profile Header */}
-        <Animated.View style={[styles.profileHeader, animatedStyle]} entering={FadeIn}>
-          <View style={styles.profileImageContainer}>
-            {user.avatar ? (
-              <Image source={{ uri: user.avatar }} style={styles.profileImage} />
-            ) : (
-              <View style={styles.profileImagePlaceholder}>
-                <User size={40} color="#007AFF" />
-              </View>
-            )}
+        <View style={styles.profileSection}>
+          <View style={styles.avatarWrapper}>
+            <Image source={{ uri: user.avatar }} style={styles.profileImage} />
+            <TouchableOpacity style={styles.editIcon} onPress={handleEditProfile}>
+              <Pencil size={18} color="#fff" />
+            </TouchableOpacity>
           </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{user.name}</Text>
-            <Text style={styles.profileEmail}>{user.email}</Text>
-            <View style={styles.profileBadge}>
-              <Text style={styles.profileBadgeText}>
-                {userType === 'owner' ? 'Car Owner' : 'Renter'}
-              </Text>
-            </View>
-          </View>
-        </Animated.View>
-
-        {/* Stats */}
-        <Animated.View style={styles.statsContainer} entering={FadeIn.delay(200)}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{bookings.length}</Text>
-            <Text style={styles.statLabel}>Bookings</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>4.8</Text>
-            <Text style={styles.statLabel}>Rating</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>12</Text>
-            <Text style={styles.statLabel}>Reviews</Text>
-          </View>
-        </Animated.View>
-
-        {/* Menu Items */}
-        <View style={styles.menuContainer}>
-          <MenuItem
-            icon={Calendar}
-            title="My Bookings"
-            onPress={() => router.push('/bookings')}
-          />
-          <MenuItem
-            icon={Heart}
-            title="Favorites"
-            onPress={() => router.push('/favorites')}
-          />
-          <MenuItem
-            icon={CreditCard}
-            title="Payment Methods"
-            onPress={() => router.push('/payment-methods')}
-          />
-          <MenuItem
-            icon={Star}
-            title="Reviews"
-            onPress={() => router.push('/reviews')}
-          />
-          <MenuItem
-            icon={Bell}
-            title="Notifications"
-            onPress={() => router.push('/notifications')}
-          />
-          <MenuItem
-            icon={Shield}
-            title="Privacy & Security"
-            onPress={() => router.push('/privacy')}
-          />
-          <MenuItem
-            icon={HelpCircle}
-            title="Help & Support"
-            onPress={() => router.push('/help')}
-          />
-          <MenuItem
-            icon={Settings}
-            title="Settings"
-            onPress={() => router.push('/settings')}
-          />
-          <MenuItem
-            icon={LogOut}
-            title="Logout"
-            onPress={handleLogout}
-            showChevron={false}
-          />
+          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.username}>{user.username}</Text>
         </View>
+
+        {/* Contact Info */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>📇 Contact Info</Text>
+          <View style={styles.infoItem}>
+            <Mail size={18} color="#007AFF" />
+            <Text style={styles.infoText}>{user.email}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Phone size={18} color="#007AFF" />
+            <Text style={styles.infoText}>{user.phone}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <MapPin size={18} color="#007AFF" />
+            <Text style={styles.infoText}>{user.address}</Text>
+          </View>
+        </View>
+
+        {/* Rental History */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>🕓 Recent Rentals</Text>
+          <Text style={styles.cardSubtitle}>Your recent car bookings</Text>
+          {rentals.map((rental, index) => (
+            <View key={index} style={styles.rentalCard}>
+              <View>
+                <Text style={styles.carName}>{rental.car}</Text>
+                <Text style={styles.rentalDetails}>{rental.date} • {rental.duration}</Text>
+              </View>
+              <View style={styles.statusBadge}>
+                <Text style={styles.statusText}>{rental.status}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Logout */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -203,186 +118,124 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#eef4fb',
   },
-  loginContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  scrollContent: {
+    paddingBottom: 40,
+    paddingHorizontal: 16,
+  },
+  profileSection: {
     alignItems: 'center',
-    paddingHorizontal: 32,
+    marginTop: 30,
+    marginBottom: 25,
   },
-  loginIcon: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#E3F2FD',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  loginTitle: {
-    fontSize: 28,
-    fontFamily: 'Poppins-Bold',
-    color: '#1D1D1F',
-    marginBottom: 8,
-  },
-  loginSubtitle: {
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#8E8E93',
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-  loginButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    marginBottom: 12,
-    minWidth: 200,
-  },
-  loginButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    textAlign: 'center',
-  },
-  registerButton: {
-    borderWidth: 1,
-    borderColor: '#007AFF',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    minWidth: 200,
-  },
-  registerButtonText: {
-    color: '#007AFF',
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    textAlign: 'center',
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 20,
-    marginTop: 20,
-    padding: 20,
-    borderRadius: 16,
+  avatarWrapper: {
+    position: 'relative',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  profileImageContainer: {
-    marginRight: 16,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 6,
   },
   profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
-  profileImagePlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#E3F2FD',
-    justifyContent: 'center',
-    alignItems: 'center',
+  editIcon: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#007AFF',
+    borderRadius: 20,
+    padding: 6,
+    elevation: 3,
   },
-  profileInfo: {
-    flex: 1,
-  },
-  profileName: {
-    fontSize: 24,
-    fontFamily: 'Poppins-Bold',
-    color: '#1D1D1F',
-    marginBottom: 4,
-  },
-  profileEmail: {
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#8E8E93',
-    marginBottom: 8,
-  },
-  profileBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#E3F2FD',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  profileBadgeText: {
-    fontSize: 12,
-    fontFamily: 'Inter-Medium',
-    color: '#007AFF',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 20,
+  name: {
+    fontSize: 22,
+    fontWeight: '700',
     marginTop: 12,
-    paddingVertical: 20,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    color: '#1e1e1e',
   },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontFamily: 'Poppins-Bold',
-    color: '#1D1D1F',
-    marginBottom: 4,
-  },
-  statLabel: {
+  username: {
     fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#8E8E93',
+    color: '#666',
+    marginTop: 2,
   },
-  menuContainer: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 20,
-    marginTop: 20,
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 20,
-    borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  menuItem: {
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: '#1c1c1e',
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#888',
+    marginBottom: 10,
+  },
+  infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
+    marginBottom: 10,
+  },
+  infoText: {
+    fontSize: 15,
+    color: '#333',
+  },
+  rentalCard: {
+    backgroundColor: '#f2f8ff',
+    padding: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  menuItemLeft: {
-    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 12,
   },
-  menuItemIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#E3F2FD',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  menuItemText: {
+  carName: {
     fontSize: 16,
-    fontFamily: 'Inter-Medium',
-    color: '#1D1D1F',
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  rentalDetails: {
+    fontSize: 13,
+    color: '#555',
+    marginTop: 2,
+  },
+  statusBadge: {
+    backgroundColor: '#d0f5d0',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#28a745',
+  },
+  logoutButton: {
+    backgroundColor: '#ff3b30',
+    marginTop: 10,
+    alignSelf: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 30,
+    elevation: 2,
+  },
+  logoutText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });
