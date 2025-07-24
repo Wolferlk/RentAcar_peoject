@@ -57,7 +57,7 @@ const AdminSidebar = ({ currentRoute = '/admin/dashboard', onNavigate }: AdminSi
           id: 'account-management',
           label: 'Account Management',
           icon: Users,
-          path: '/account-management'
+          path: '/admin/account-management'
         },
        
       ]
@@ -69,7 +69,7 @@ const AdminSidebar = ({ currentRoute = '/admin/dashboard', onNavigate }: AdminSi
           id: 'vehicle-listings',
           label: 'Vehicle Listings',
           icon: Car,
-          path: '/vehicle-listings'
+          path: '/admin/vehicle-listings'
         },
         
       ]
@@ -81,27 +81,27 @@ const AdminSidebar = ({ currentRoute = '/admin/dashboard', onNavigate }: AdminSi
           id: 'disputes',
           label: 'Disputes',
           icon: MessageSquare,
-          path: '/admin/disputes',
+          path: '/admin-disputes',
           // badge: 0
         },
         {
           id: 'complaints',
           label: 'Complaints',
           icon: Bell,
-          path: '/admin/complaints',
+          path: '/admin-complaints',
           // badge: ''
         }
       ]
     },
     {
-      title: "Reports & Settings",
+      title: "",
       items: [
-        {
-          id: 'reports',
-          label: 'Reports',
-          icon: FileText,
-          path: '/admin/reports'
-        },
+        // {
+        //   id: 'reports',
+        //   label: 'Reports',
+        //   icon: FileText,
+        //   path: '/admin/reports'
+        // },
         {
           id: 'settings',
           label: 'Platform Settings',
