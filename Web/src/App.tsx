@@ -19,6 +19,9 @@ import HelpPage from './pages/HelpPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 
+import AdminLogin from './pages/Auth/AdminLogin';
+import AdminDashboard from './pages/Dashboard/AdminDashboard';
+
 function App() {
   return (
     <AuthProvider>
@@ -41,6 +44,12 @@ function App() {
             <Route path="/help" element={<HelpPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+
+            {/* admin pages */}
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            
+            {/* Fallback route */}
           </Routes>
           <Footer />
         </div>

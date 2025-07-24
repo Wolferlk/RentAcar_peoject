@@ -3,7 +3,7 @@ import { User } from '../types';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, userType: 'user' | 'owner') => Promise<boolean>;
+  login: (email: string, password: string, userType: 'user' | 'owner'|'admin') => Promise<boolean>;
   signup: (userData: Omit<User, 'id' | 'createdAt'>, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string, userType: 'user' | 'owner'): Promise<boolean> => {
+  const login = async (email: string, password: string, userType: 'user' | 'owner' | 'admin'): Promise<boolean> => {
     setIsLoading(true);
     try {
       // Simulate API call

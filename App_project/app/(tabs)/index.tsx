@@ -11,7 +11,14 @@ import {
   FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, MapPin, Calendar, Star, ChevronRight, Car } from 'lucide-react-native';
+import {
+  Search,
+  MapPin,
+  Calendar,
+  Star,
+  ChevronRight,
+  Car,
+} from 'lucide-react-native';
 import { useUserStore } from '@/stores/userStore';
 import { router } from 'expo-router';
 import Animated, {
@@ -30,7 +37,7 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
-  
+
   const animatedValue = useSharedValue(0);
   const scaleValue = useSharedValue(1);
 
@@ -53,7 +60,7 @@ export default function HomeScreen() {
   const handleSearch = () => {
     router.push({
       pathname: '/search',
-      params: { 
+      params: {
         query: searchQuery,
         location: selectedLocation,
         date: selectedDate,
@@ -65,14 +72,14 @@ export default function HomeScreen() {
     scaleValue.value = withTiming(0.95, { duration: 100 }, () => {
       scaleValue.value = withSpring(1);
     });
-    
+
     router.push({
-      pathname: '/car-details',
+      pathname: '/car-details/[carId]',
       params: { carId },
     });
   };
 
-  const renderFeaturedCar = ({ item }: { item: typeof allCars[0] }) => (
+  const renderFeaturedCar = ({ item }: { item: (typeof allCars)[0] }) => (
     <TouchableOpacity
       style={styles.featuredCarCard}
       onPress={() => handleCarPress(item.id)}
@@ -84,7 +91,9 @@ export default function HomeScreen() {
         style={styles.featuredCarGradient}
       >
         <View style={styles.featuredCarInfo}>
-          <Text style={styles.featuredCarName}>{item.make} {item.model}</Text>
+          <Text style={styles.featuredCarName}>
+            {item.make} {item.model}
+          </Text>
           <View style={styles.featuredCarRating}>
             <Star size={14} color="#FFD700" fill="#FFD700" />
             <Text style={styles.featuredCarRatingText}>{item.rating}</Text>
@@ -95,7 +104,7 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
-  const renderPopularCar = ({ item }: { item: typeof allCars[0] }) => (
+  const renderPopularCar = ({ item }: { item: (typeof allCars)[0] }) => (
     <TouchableOpacity
       style={styles.popularCarCard}
       onPress={() => handleCarPress(item.id)}
@@ -103,7 +112,9 @@ export default function HomeScreen() {
     >
       <Image source={{ uri: item.image }} style={styles.popularCarImage} />
       <View style={styles.popularCarInfo}>
-        <Text style={styles.popularCarName}>{item.make} {item.model}</Text>
+        <Text style={styles.popularCarName}>
+          {item.make} {item.model}
+        </Text>
         <Text style={styles.popularCarLocation}>{item.location}</Text>
         <View style={styles.popularCarDetails}>
           <View style={styles.popularCarRating}>
@@ -145,7 +156,7 @@ export default function HomeScreen() {
                 placeholderTextColor="#8E8E93"
               />
             </View>
-            
+
             <View style={styles.filterRow}>
               <View style={styles.filterItem}>
                 <MapPin size={16} color="#8E8E93" />
@@ -157,7 +168,7 @@ export default function HomeScreen() {
                   placeholderTextColor="#8E8E93"
                 />
               </View>
-              
+
               <View style={styles.filterItem}>
                 <Calendar size={16} color="#8E8E93" />
                 <TextInput
@@ -169,8 +180,11 @@ export default function HomeScreen() {
                 />
               </View>
             </View>
-            
-            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+
+            <TouchableOpacity
+              style={styles.searchButton}
+              onPress={handleSearch}
+            >
               <Text style={styles.searchButtonText}>Search Cars</Text>
             </TouchableOpacity>
           </View>
@@ -184,7 +198,7 @@ export default function HomeScreen() {
               <Text style={styles.seeAllText}>See All</Text>
             </TouchableOpacity>
           </View>
-          
+
           <FlatList
             data={allCars.slice(0, 3)}
             renderItem={renderFeaturedCar}
@@ -203,7 +217,7 @@ export default function HomeScreen() {
               <Text style={styles.seeAllText}>See All</Text>
             </TouchableOpacity>
           </View>
-          
+
           <FlatList
             data={allCars.slice(0, 4)}
             renderItem={renderPopularCar}
@@ -222,7 +236,9 @@ export default function HomeScreen() {
               <TouchableOpacity
                 key={category}
                 style={styles.categoryCard}
-                onPress={() => router.push({ pathname: '/search', params: { category } })}
+                onPress={() =>
+                  router.push({ pathname: '/search', params: { category } })
+                }
               >
                 <Text style={styles.categoryText}>{category}</Text>
                 <ChevronRight size={16} color="#8E8E93" />

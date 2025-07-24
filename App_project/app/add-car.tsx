@@ -10,8 +10,8 @@ import {
   Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   Car,
   MapPin,
   DollarSign,
@@ -147,7 +147,7 @@ export default function AddCarScreen() {
           {/* Basic Information */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Basic Information</Text>
-            
+
             <View style={styles.inputContainer}>
               <Car size={20} color="#8E8E93" />
               <TextInput
@@ -197,7 +197,7 @@ export default function AddCarScreen() {
           {/* Pricing */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Pricing</Text>
-            
+
             <View style={styles.inputContainer}>
               <DollarSign size={20} color="#8E8E93" />
               <TextInput
@@ -226,7 +226,7 @@ export default function AddCarScreen() {
           {/* Location & Description */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Location & Description</Text>
-            
+
             <View style={styles.inputContainer}>
               <MapPin size={20} color="#8E8E93" />
               <TextInput
@@ -254,7 +254,7 @@ export default function AddCarScreen() {
           {/* Specifications */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Specifications</Text>
-            
+
             <View style={styles.inputContainer}>
               <Fuel size={20} color="#8E8E93" />
               <TextInput
@@ -293,7 +293,7 @@ export default function AddCarScreen() {
           {/* Driver Options */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Driver Options</Text>
-            
+
             <View style={styles.switchContainer}>
               <Text style={styles.switchLabel}>Available with driver</Text>
               <Switch
@@ -320,7 +320,7 @@ export default function AddCarScreen() {
           {/* Features */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Features</Text>
-            
+
             <View style={styles.featureInputContainer}>
               <TextInput
                 style={styles.featureInput}
@@ -349,7 +349,7 @@ export default function AddCarScreen() {
           {/* Contact Information */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Contact Information</Text>
-            
+
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
