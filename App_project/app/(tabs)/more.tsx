@@ -201,7 +201,7 @@ export default function MoreScreen() {
               icon={Star}
               title="Rate Our App"
               subtitle="Help us improve"
-              onPress={handleRateApp}
+              onPress={() => router.push('/feedbackForm')}
               iconColor="#FF9800"
             />
           </View>
