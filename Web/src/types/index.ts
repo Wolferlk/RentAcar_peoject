@@ -38,6 +38,7 @@ export interface Vehicle {
     email: string;
     address: string;
   };
+  status?: 'pending' | 'approved' | 'rejected';
 }
 
 export interface Booking {
