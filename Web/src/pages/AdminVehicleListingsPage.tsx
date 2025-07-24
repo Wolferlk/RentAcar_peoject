@@ -1,3 +1,4 @@
+// Web/src/pages/AdminVehicleListingsPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Vehicle } from '../types';
 import { mockVehicles } from '../data/mockData';
@@ -6,17 +7,22 @@ import { Check, X, Eye } from 'lucide-react';
 
 const AdminVehicleListingsPage: React.FC = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const navigate = useNavigate();
 
   useEffect(() => {
     // Simulate API call - add status to each vehicle
     const fetchPendingVehicles = () => {
       setTimeout(() => {
-        setVehicles(mockVehicles.map(v => ({
+        const vehiclesWithStatus = mockVehicles.map(v => ({
           ...v,
-          status: 'pending'
-        })));
+          status: 'pending' as 'pending' // Ensure the status is explicitly typed
+        }));
+        setVehicles(vehiclesWithStatus);
+        setFilteredVehicles(vehiclesWithStatus);
         setLoading(false);
       }, 800);
     };
@@ -28,7 +34,6 @@ const AdminVehicleListingsPage: React.FC = () => {
     setVehicles(vehicles.map(v => 
       v.id === id ? { ...v, status: 'approved' } : v
     ));
-    // In a real app, you would call an API here
     console.log(`Vehicle ${id} approved`);
   };
 
@@ -36,7 +41,6 @@ const AdminVehicleListingsPage: React.FC = () => {
     setVehicles(vehicles.map(v => 
       v.id === id ? { ...v, status: 'rejected' } : v
     ));
-    // In a real app, you would call an API here
     console.log(`Vehicle ${id} rejected`);
   };
 
@@ -44,20 +48,35 @@ const AdminVehicleListingsPage: React.FC = () => {
     navigate(`/admin/vehicles/${id}`);
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    filterVehicles(value, statusFilter);
+  };
+
+  const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setStatusFilter(value);
+    filterVehicles(searchTerm, value);
+  };
+
+  const filterVehicles = (search: string, status: string) => {
+    const filtered = vehicles.filter(vehicle => {
+      const matchesSearch = vehicle.name.toLowerCase().includes(search.toLowerCase());
+      const matchesStatus = status === 'all' || vehicle.status === status;
+      return matchesSearch && matchesStatus;
+    });
+    setFilteredVehicles(filtered);
+  };
+
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case 'approved':
-        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-          Approved
-        </span>;
+        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Approved</span>;
       case 'rejected':
-        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-          Rejected
-        </span>;
+        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>;
       default:
-        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-          Pending
-        </span>;
+        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>;
     }
   };
 
@@ -76,8 +95,29 @@ const AdminVehicleListingsPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Vehicle Approval Requests</h1>
-          <p className="text-gray-600">Review and approve new vehicle listings</p>
+          <h1 className="text-3xl font-bold text-gray-900">Vehicle Approval</h1>
+          {/* <p className="text-gray-600">Review and approve new vehicle listings</p> */}
+        </div>
+
+        {/* Search and Filter Section */}
+        <div className="mb-4 flex justify-between items-center">
+          <input
+            type="text"
+            placeholder="Search by vehicle name..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="border border-gray-300 rounded-lg px-4 py-2 w-1/3"
+          />
+          <select
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            className="border border-gray-300 rounded-lg px-4 py-2 ml-4"
+          >
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
         </div>
 
         <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -93,7 +133,7 @@ const AdminVehicleListingsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {vehicles.map(vehicle => (
+                {filteredVehicles.map(vehicle => (
                   <tr key={vehicle.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
