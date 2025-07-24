@@ -1,14 +1,27 @@
-import type React from "react"
-import { useState } from "react"
-import { Users, Calendar, DollarSign, AlertCircle, Eye, Edit, Trash2, MoreHorizontal, Car } from "lucide-react"
+import type React from "react";
+import { useState } from "react";
+import { Users, Calendar, DollarSign, AlertCircle, Eye, Edit, Trash2, MoreHorizontal, Car } from "lucide-react";
+import { mockVehicles } from "../../data/mockData"; // Import mockVehicles
 
 const dummyData = {
   totalUsers: 120,
   totalBookings: 75,
   totalRevenue: 15800,
   pendingVerifications: 8,
-  totalVehicles: 45,
-}
+  totalVehicles: mockVehicles.length, // Updated to use mockVehicles length
+};
+
+// Map mockVehicles to the structure expected by the vehicles table
+const vehicles = mockVehicles.map((vehicle) => ({
+  id: vehicle.id,
+  images: vehicle.images, // Keep the images array for rendering the first image
+  name: vehicle.name, // Already includes brand, model, and year
+  brand: vehicle.brand,
+  type: vehicle.type,
+  location: vehicle.location,
+  availability: `${new Date(vehicle.availability.from).toLocaleDateString()} to ${new Date(vehicle.availability.to).toLocaleDateString()}`, // Format availability
+  fuelType: vehicle.fuelType,
+}));
 
 const userAccounts = [
   {
@@ -47,52 +60,7 @@ const userAccounts = [
     location: "Gotham",
     status: "delete",
   },
-  
-]
-
-const vehicles = [
-  {
-    id: "V001",
-    owner: "John Smith",
-    vehicleName: "Toyota Prius 2023",
-    brand: "Toyota",
-    vehicleType: "Sedan",
-    noOfSeats: 5,
-    fuelType: "Hybrid",
-    status: "available",
-  },
-  {
-    id: "V002",
-    owner: "Sarah Lee",
-    vehicleName: "Honda Civic LX",
-    brand: "Honda",
-    vehicleType: "Sedan",
-    noOfSeats: 5,
-    fuelType: "Gasoline",
-    status: "rented",
-  },
-  {
-    id: "V003",
-    owner: "Michael Ray",
-    vehicleName: "Tesla Model 3",
-    brand: "Tesla",
-    vehicleType: "Sedan",
-    noOfSeats: 5,
-    fuelType: "Electric",
-    status: "available",
-  },
-  {
-    id: "V004",
-    owner: "James Dean",
-    vehicleName: "Ford Ranger XLT",
-    brand: "Ford",
-    vehicleType: "Pickup Truck",
-    noOfSeats: 5,
-    fuelType: "Gasoline",
-    status: "maintenance",
-  },
- 
-]
+];
 
 const recentBookings = [
   {
@@ -140,57 +108,56 @@ const recentBookings = [
     price: 300,
     bookedBy: "Clark Kent",
   },
-]
+];
 
 interface DropdownMenuProps {
-  children: React.ReactNode
-  onAction: (action: string) => void
+  children: React.ReactNode;
+  onAction: (action: string) => void;
 }
 
 const DropdownMenu: React.FC<DropdownMenuProps> = ({ children, onAction }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="relative">
       <button onClick={() => setIsOpen(!isOpen)} className="p-2 hover:bg-gray-100 rounded-md transition-colors">
         <MoreHorizontal className="h-5 w-5" />
       </button>
-
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
             <div className="py-1">
-              <div className="px-3 py-2 text-base font-medium text-gray-900 border-b border-gray-100">Actions</div>{" "}
+              <div className="px-3 py-2 text-base font-medium text-gray-900 border-b border-gray-100">Actions</div>
               <button
                 onClick={() => {
-                  onAction("view")
-                  setIsOpen(false)
+                  onAction("view");
+                  setIsOpen(false);
                 }}
-                className="flex items-center w-full px-3 py-2 text-base text-gray-700 hover:bg-gray-100 transition-colors" 
+                className="flex items-center w-full px-3 py-2 text-base text-gray-700 hover:bg-gray-100 transition-colors"
               >
-                <Eye className="mr-2 h-5 w-5" /> 
+                <Eye className="mr-2 h-5 w-5" />
                 View Details
               </button>
               <button
                 onClick={() => {
-                  onAction("edit")
-                  setIsOpen(false)
+                  onAction("edit");
+                  setIsOpen(false);
                 }}
-                className="flex items-center w-full px-3 py-2 text-base text-gray-700 hover:bg-gray-100 transition-colors" 
+                className="flex items-center w-full px-3 py-2 text-base text-gray-700 hover:bg-gray-100 transition-colors"
               >
-                <Edit className="mr-2 h-5 w-5" /> 
+                <Edit className="mr-2 h-5 w-5" />
                 Edit
               </button>
               <div className="border-t border-gray-100 my-1" />
               <button
                 onClick={() => {
-                  onAction("delete")
-                  setIsOpen(false)
+                  onAction("delete");
+                  setIsOpen(false);
                 }}
-                className="flex items-center w-full px-3 py-2 text-base text-red-600 hover:bg-red-50 transition-colors" 
+                className="flex items-center w-full px-3 py-2 text-base text-red-600 hover:bg-red-50 transition-colors"
               >
-                <Trash2 className="mr-2 h-5 w-5" /> 
+                <Trash2 className="mr-2 h-5 w-5" />
                 Delete
               </button>
             </div>
@@ -198,64 +165,66 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ children, onAction }) => {
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
 const getStatusStyles = (status: string) => {
   switch (status) {
     case "verify":
     case "available":
-      return "bg-green-100 text-green-800 border-green-200"
+      return "bg-green-100 text-green-800 border-green-200";
     case "suspend":
     case "maintenance":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
     case "delete":
-      return "bg-red-100 text-red-800 border-red-200"
+    case "unavailable":
+      return "bg-red-100 text-red-800 border-red-200";
     case "rented":
-      return "bg-blue-100 text-blue-800 border-blue-200"
+      return "bg-blue-100 text-blue-800 border-blue-200";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
-}
+};
 
 const getFuelTypeColor = (fuelType: string) => {
   switch (fuelType.toLowerCase()) {
     case "electric":
-      return "bg-green-100 text-green-800 border-green-200"
+      return "bg-green-100 text-green-800 border-green-200";
     case "hybrid":
-      return "bg-blue-100 text-blue-800 border-blue-200"
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    case "petrol":
     case "gasoline":
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "bg-gray-100 text-gray-800 border-gray-200";
     case "diesel":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
-}
+};
 
 const AdminDashboard: React.FC = () => {
   const handleUserAction = (action: string, userId: string) => {
-    console.log(`${action} action for user ${userId}`)
+    console.log(`${action} action for user ${userId}`);
     // Implement your action logic here
-  }
+  };
 
   const handleBookingAction = (action: string, bookingId: string) => {
-    console.log(`${action} action for booking ${bookingId}`)
+    console.log(`${action} action for booking ${bookingId}`);
     // Implement your action logic here
-  }
+  };
 
   const handleVehicleAction = (action: string, vehicleId: string) => {
-    console.log(`${action} action for vehicle ${vehicleId}`)
+    console.log(`${action} action for vehicle ${vehicleId}`);
     // Implement your action logic here
-  }
+  };
 
   return (
     <div className="flex-1 space-y-6 p-6 bg-gray-50">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900">Dashboard</h1>{" "}
-          <p className="text-lg text-gray-600 mt-1">Welcome back! Here's what's happening with your rental platform.</p>{" "}
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+          <p className="text-lg text-gray-600 mt-1">Welcome back! Here's what's happening with your rental platform.</p>
         </div>
       </div>
 
@@ -265,12 +234,12 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-base font-medium text-gray-600">Total Users</p> 
-              <p className="text-3xl font-bold text-blue-600 mt-2">{dummyData.totalUsers}</p>{" "}
-              <p className="text-sm text-gray-500 mt-1">+12% from last month</p> 
+              <p className="text-base font-medium text-gray-600">Total Users</p>
+              <p className="text-3xl font-bold text-blue-600 mt-2">{dummyData.totalUsers}</p>
+              <p className="text-sm text-gray-500 mt-1">+12% from last month</p>
             </div>
             <div className="p-3 bg-blue-50 rounded-full">
-              <Users className="h-7 w-7 text-blue-600" /> 
+              <Users className="h-7 w-7 text-blue-600" />
             </div>
           </div>
         </div>
@@ -279,12 +248,12 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-base font-medium text-gray-600">Total Vehicles</p>{" "}
-              <p className="text-3xl font-bold text-purple-600 mt-2">{dummyData.totalVehicles}</p>{" "}
-              <p className="text-sm text-gray-500 mt-1">+5% from last month</p> 
+              <p className="text-base font-medium text-gray-600">Total Vehicles</p>
+              <p className="text-3xl font-bold text-purple-600 mt-2">{dummyData.totalVehicles}</p>
+              <p className="text-sm text-gray-500 mt-1">+5% from last month</p>
             </div>
             <div className="p-3 bg-purple-50 rounded-full">
-              <Car className="h-7 w-7 text-purple-600" /> 
+              <Car className="h-7 w-7 text-purple-600" />
             </div>
           </div>
         </div>
@@ -293,12 +262,12 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-base font-medium text-gray-600">Total Bookings</p>{" "}
-              <p className="text-3xl font-bold text-green-600 mt-2">{dummyData.totalBookings}</p>{" "}
-              <p className="text-sm text-gray-500 mt-1">+8% from last month</p> 
+              <p className="text-base font-medium text-gray-600">Total Bookings</p>
+              <p className="text-3xl font-bold text-green-600 mt-2">{dummyData.totalBookings}</p>
+              <p className="text-sm text-gray-500 mt-1">+8% from last month</p>
             </div>
             <div className="p-3 bg-green-50 rounded-full">
-              <Calendar className="h-7 w-7 text-green-600" /> 
+              <Calendar className="h-7 w-7 text-green-600" />
             </div>
           </div>
         </div>
@@ -307,12 +276,12 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-base font-medium text-gray-600">Total Revenue</p>{" "}
-              <p className="text-3xl font-bold text-yellow-600 mt-2">${dummyData.totalRevenue.toLocaleString()}</p>{" "}
-              <p className="text-sm text-gray-500 mt-1">+15% from last month</p> 
+              <p className="text-base font-medium text-gray-600">Total Revenue</p>
+              <p className="text-3xl font-bold text-yellow-600 mt-2">${dummyData.totalRevenue.toLocaleString()}</p>
+              <p className="text-sm text-gray-500 mt-1">+15% from last month</p>
             </div>
             <div className="p-3 bg-yellow-50 rounded-full">
-              <DollarSign className="h-7 w-7 text-yellow-600" /> 
+              <DollarSign className="h-7 w-7 text-yellow-600" />
             </div>
           </div>
         </div>
@@ -321,12 +290,12 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-base font-medium text-gray-600">Pending Verifications</p>{" "}
-              <p className="text-3xl font-bold text-red-600 mt-2">{dummyData.pendingVerifications}</p>{" "}
-              <p className="text-sm text-gray-500 mt-1">Requires attention</p> 
+              <p className="text-base font-medium text-gray-600">Pending Verifications</p>
+              <p className="text-3xl font-bold text-red-600 mt-2">{dummyData.pendingVerifications}</p>
+              <p className="text-sm text-gray-500 mt-1">Requires attention</p>
             </div>
             <div className="p-3 bg-red-50 rounded-full">
-              <AlertCircle className="h-7 w-7 text-red-600" /> 
+              <AlertCircle className="h-7 w-7 text-red-600" />
             </div>
           </div>
         </div>
@@ -337,10 +306,10 @@ const AdminDashboard: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Vehicle Fleet</h2>{" "}
-              <p className="text-base text-gray-600 mt-1">Manage and monitor all vehicles in your rental fleet</p>{" "}
+              <h2 className="text-xl font-semibold text-gray-900">Vehicles</h2>
+              <p className="text-base text-gray-600 mt-1">Manage and monitor all vehicles in your rental fleet</p>
             </div>
-            <button className="px-4 py-2 bg-purple-600 text-white text-base font-medium rounded-md hover:bg-purple-700 transition-colors">{" "}
+            <button className="px-4 py-2 bg-purple-600 text-white text-base font-medium rounded-md hover:bg-purple-700 transition-colors">
               View All Vehicles
             </button>
           </div>
@@ -350,63 +319,65 @@ const AdminDashboard: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
-                  Owner
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  Vehicle Id
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
-                  Vehicle Name
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  Image
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Brand
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
-                  Vehicle Type
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  Type
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">{" "}
-                  No of Seats
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  Location
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">{" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  Availability
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Fuel Type
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">{" "}
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-12"></th>{" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-12"></th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {vehicles.map((vehicle) => (
                 <tr key={vehicle.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base font-medium text-gray-900">{vehicle.owner}</div>{" "}
+                    <div className="text-base font-medium text-gray-900">{vehicle.id}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base text-gray-900">{vehicle.vehicleName}</div>{" "}
+                    <img
+                      src={vehicle.images[0]}
+                      alt={vehicle.name}
+                      className="h-12 w-12 object-cover rounded"
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200"> {" "}
+                    <div className="text-base text-gray-900">{vehicle.name}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200">
                       {vehicle.brand}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600">{vehicle.vehicleType}</td>{" "}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base text-gray-900 text-center">{vehicle.noOfSeats}</div>{" "}
-                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600">{vehicle.type}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600">{vehicle.location}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600">{vehicle.availability}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border ${getFuelTypeColor(vehicle.fuelType)}`} /* INCREASED: text-xs → text-sm */
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border ${getFuelTypeColor(vehicle.fuelType)}`}
                     >
                       {vehicle.fuelType}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize ${getStatusStyles(vehicle.status)}`} /* INCREASED: text-xs → text-sm */
-                    >
-                      {vehicle.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium"> {" "}
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
                     <DropdownMenu onAction={(action) => handleVehicleAction(action, vehicle.id)}>
                       <div />
                     </DropdownMenu>
@@ -423,10 +394,10 @@ const AdminDashboard: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">User Accounts</h2>{" "}
-              <p className="text-base text-gray-600 mt-1">Manage and monitor user accounts across your platform</p>{" "}
+              <h2 className="text-xl font-semibold text-gray-900">User Accounts</h2>
+              <p className="text-base text-gray-600 mt-1">Manage and monitor user accounts across your platform</p>
             </div>
-            <button className="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md hover:bg-blue-700 transition-colors">{" "}
+            <button className="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md hover:bg-blue-700 transition-colors">
               View All Users
             </button>
           </div>
@@ -436,49 +407,41 @@ const AdminDashboard: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Name</th>{" "}
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">{" "}
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Role</th>{" "}
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
-                  Joined
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">  {" "}
-                  Location
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">  {" "}
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-12"></th>{" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-12"></th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {userAccounts.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base font-medium text-gray-900">{user.fullName}</div>{" "}
+                    <div className="text-base font-medium text-gray-900">{user.fullName}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base text-gray-600">{user.email}</div> 
+                    <div className="text-base text-gray-600">{user.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200 capitalize">  {" "}
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200 capitalize">
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600"> {" "}
+                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600">
                     {new Date(user.joinedDate).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600">{user.location}</td>{" "}
+                  <td className="px-6 py-4 whitespace-nowrap text-base text-gray-600">{user.location}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize ${getStatusStyles(user.status)}`} /* INCREASED: text-xs → text-sm */
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize ${getStatusStyles(user.status)}`}
                     >
                       {user.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium">{" "}
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
                     <DropdownMenu onAction={(action) => handleUserAction(action, user.id)}>
                       <div />
                     </DropdownMenu>
@@ -495,10 +458,10 @@ const AdminDashboard: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Recent Bookings</h2>{" "}
-              <p className="text-base text-gray-600 mt-1">Latest booking activities on your platform</p>{" "}
+              <h2 className="text-xl font-semibold text-gray-900">Recent Bookings</h2>
+              <p className="text-base text-gray-600 mt-1">Latest booking activities on your platform</p>
             </div>
-            <button className="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md hover:bg-blue-700 transition-colors">{" "}
+            <button className="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md hover:bg-blue-700 transition-colors">
               View All Bookings
             </button>
           </div>
@@ -508,50 +471,50 @@ const AdminDashboard: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Booking ID
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">  {" "}
-                  Vehicle
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  Vehicle Name
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Owner
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">  {" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Duration
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Price
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"> {" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Booked By
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-12"></th>{" "}
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-12"></th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {recentBookings.map((booking) => (
                 <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base font-medium text-gray-900">{booking.id}</div>{" "}
+                    <div className="text-base font-medium text-gray-900">{booking.id}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base text-gray-900">{booking.vehicleName}</div>{" "}
+                    <div className="text-base text-gray-900">{booking.vehicleName}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base text-gray-600">{booking.owner}</div>{" "}
+                    <div className="text-base text-gray-600">{booking.owner}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base text-gray-900">{new Date(booking.startDate).toLocaleDateString()}</div>{" "}
-                    <div className="text-base text-gray-500">to {new Date(booking.endDate).toLocaleDateString()}</div>{" "}
+                    <div className="text-base text-gray-900">{new Date(booking.startDate).toLocaleDateString()}</div>
+                    <div className="text-base text-gray-500">to {new Date(booking.endDate).toLocaleDateString()}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base font-medium text-gray-900">${booking.price}</div>{" "}
+                    <div className="text-base font-medium text-gray-900">${booking.price}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-base text-gray-900">{booking.bookedBy}</div>{" "}
+                    <div className="text-base text-gray-900">{booking.bookedBy}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium"> {" "}
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
                     <DropdownMenu onAction={(action) => handleBookingAction(action, booking.id)}>
                       <div />
                     </DropdownMenu>
@@ -563,7 +526,7 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AdminDashboard
+export default AdminDashboard;
