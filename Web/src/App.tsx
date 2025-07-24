@@ -19,13 +19,27 @@ import HelpPage from './pages/HelpPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 
+
 import ManageAccounts from './pages/ManageAccounts';
+
+import AdminTestPage from './pages/AdminTestPage';
+
+import AdminVehicleListingsPage from './pages/AdminVehicleListingsPage';
+import AdminVehicleDetailsPage from './pages/AdminVehicleDetailsPage';
+
+import AdminLogin from './pages/Auth/AdminLogin';
+import AdminDashboard from './pages/Dashboard/AdminDashboard';
+
+
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="min-h-screen bg-gray-50">
+          <Routes>
+            <Route path="/admin-test" element={<AdminTestPage />} /> {/* Admin sidebar test page */}
+          </Routes>
           <Navbar />
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -43,7 +57,18 @@ function App() {
             <Route path="/help" element={<HelpPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+
             <Route path='/manage-accounts' element={<ManageAccounts />} />
+
+            {/* admin pages */}
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/admin-vehicle-listings" element={<AdminVehicleListingsPage />} />
+            <Route path="/admin/vehicles/:id" element={<AdminVehicleDetailsPage />} />
+            
+            {/* Fallback route */}
+
+
           </Routes>
           <Footer />
         </div>

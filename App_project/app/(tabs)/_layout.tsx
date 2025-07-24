@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, Search, User, Settings, Car } from 'lucide-react-native';
+import { Chrome as Home, Search, User, Settings, Car, HomeIcon, CarIcon } from 'lucide-react-native';
 import { useUserStore } from '@/stores/userStore';
 
 export default function TabLayout() {
@@ -33,7 +33,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ size, color }) => (
-            <Home size={size} color={color} />
+            <HomeIcon size={size} color={color} />
           ),
         }}
       />
@@ -52,7 +52,7 @@ export default function TabLayout() {
           options={{
             title: 'Dashboard',
             tabBarIcon: ({ size, color }) => (
-              <Car size={size} color={color} />
+              <CarIcon size={size} color={color} />
             ),
           }}
         />
