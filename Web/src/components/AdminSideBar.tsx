@@ -47,54 +47,31 @@ const AdminSidebar = ({ currentRoute = '/admin/dashboard', onNavigate }: AdminSi
           icon: LayoutDashboard,
           path: '/admin/dashboard'
         },
-        {
-          id: 'analytics',
-          label: 'Analytics',
-          icon: BarChart3,
-          path: '/admin/analytics'
-        }
+       
       ]
     },
     {
-      title: "Account Management",
+      title: "",
       items: [
         {
-          id: 'customers',
-          label: 'Customers',
+          id: 'account-management',
+          label: 'Account Management',
           icon: Users,
-          path: '/admin/customers'
+          path: '/account-management'
         },
-        {
-          id: 'vehicle-owners',
-          label: 'Vehicle Owners',
-          icon: UserCheck,
-          path: '/admin/vehicle-owners'
-        },
-        {
-          id: 'verifications',
-          label: 'Verifications',
-          icon: ShieldAlert,
-          path: '/admin/verifications',
-          badge: 12
-        }
+       
       ]
     },
     {
-      title: "Vehicle Management",
+      title: "",
       items: [
         {
           id: 'vehicle-listings',
           label: 'Vehicle Listings',
           icon: Car,
-          path: '/admin/vehicle-listings'
+          path: '/vehicle-listings'
         },
-        {
-          id: 'pending-approvals',
-          label: 'Pending Approvals',
-          icon: AlertTriangle,
-          path: '/admin/pending-approvals',
-          badge: 8
-        }
+        
       ]
     },
     {
@@ -105,14 +82,14 @@ const AdminSidebar = ({ currentRoute = '/admin/dashboard', onNavigate }: AdminSi
           label: 'Disputes',
           icon: MessageSquare,
           path: '/admin/disputes',
-          badge: 3
+          // badge: 0
         },
         {
           id: 'complaints',
           label: 'Complaints',
           icon: Bell,
           path: '/admin/complaints',
-          badge: 5
+          // badge: ''
         }
       ]
     },

@@ -18,6 +18,7 @@ import AboutPage from './pages/AboutPage';
 import HelpPage from './pages/HelpPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
+import AdminTestPage from './pages/AdminTestPage';
 
 
 
@@ -27,7 +28,7 @@ function App() {
       <Router>
         <div className="min-h-screen bg-gray-50">
           <Routes>
-            
+            <Route path="/admin-test" element={<AdminTestPage />} /> {/* Admin sidebar test page */}
           </Routes>
           <Navbar />
           <Routes>
