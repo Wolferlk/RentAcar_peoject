@@ -19,6 +19,8 @@ import HelpPage from './pages/HelpPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 
+import ManageAccounts from './pages/ManageAccounts';
+
 function App() {
   return (
     <AuthProvider>
@@ -41,6 +43,7 @@ function App() {
             <Route path="/help" element={<HelpPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path='/manage-accounts' element={<ManageAccounts />} />
           </Routes>
           <Footer />
         </div>
