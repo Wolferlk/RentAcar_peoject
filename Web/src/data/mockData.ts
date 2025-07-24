@@ -3,7 +3,7 @@ import { Vehicle, Review } from '../types';
 export const mockVehicles: Vehicle[] = [
   {
     id: '1',
-    ownerId: 'owner1',
+    ownerId: 'owner1',     
     name: 'Toyota Camry 2023',
     brand: 'Toyota',
     model: 'Camry',
