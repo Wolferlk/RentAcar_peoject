@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useNavigate,Link } from 'react-router-dom';
+import { Eye, EyeOff, Loader2,Car } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const AdminLogin: React.FC = () => {
@@ -33,11 +33,25 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-sm w-full bg-white shadow-xl rounded-lg p-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <Link to="/" className="inline-flex items-center space-x-2 text-blue-600">
+            <Car className="w-8 h-8" />
+            <span className="text-2xl font-bold">RentACar</span>
+          </Link>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">Welcome Back</h2>
+          <p className="mt-2 text-gray-600">Sign in to your account</p>
+        </div>
+        
+      <div className="bg-white rounded-xl shadow-lg p-8">
         <h2 className="text-2xl font-bold text-center text-gray-800">Admin Login</h2>
 
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -47,7 +61,7 @@ const AdminLogin: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="admin@example.com"
             />
           </div>
@@ -60,7 +74,7 @@ const AdminLogin: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2 border rounded-md pr-10"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter password"
               />
               <button
@@ -80,11 +94,11 @@ const AdminLogin: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition flex justify-center items-center"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
                 Logging in...
               </>
             ) : (
@@ -92,6 +106,7 @@ const AdminLogin: React.FC = () => {
             )}
           </button>
         </form>
+      </div>
       </div>
     </div>
   );
