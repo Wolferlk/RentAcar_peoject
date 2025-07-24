@@ -21,6 +21,9 @@ import PrivacyPage from './pages/PrivacyPage';
 import AdminVehicleListingsPage from './pages/AdminVehicleListingsPage';
 import AdminVehicleDetailsPage from './pages/AdminVehicleDetailsPage';
 
+import AdminLogin from './pages/Auth/AdminLogin';
+import AdminDashboard from './pages/Dashboard/AdminDashboard';
+
 function App() {
   return (
     <AuthProvider>
@@ -43,8 +46,16 @@ function App() {
             <Route path="/help" element={<HelpPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+
+            
+            {/* admin pages */}
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/admin-vehicle-listings" element={<AdminVehicleListingsPage />} />
             <Route path="/admin/vehicles/:id" element={<AdminVehicleDetailsPage />} />
+            
+            {/* Fallback route */}
+
           </Routes>
           <Footer />
         </div>
