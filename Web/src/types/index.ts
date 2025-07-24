@@ -3,7 +3,7 @@ export interface User {
   email: string;
   name: string;
   phone: string;
-  type: 'user' | 'owner';
+  type: 'user' | 'owner'|'admin';
   createdAt: string;
 }
 
@@ -38,6 +38,7 @@ export interface Vehicle {
     email: string;
     address: string;
   };
+  status?: 'pending' | 'approved' | 'rejected';
 }
 
 export interface Booking {
