@@ -19,11 +19,16 @@ import HelpPage from './pages/HelpPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 
+
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="min-h-screen bg-gray-50">
+          <Routes>
+            
+          </Routes>
           <Navbar />
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -41,6 +46,7 @@ function App() {
             <Route path="/help" element={<HelpPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            
           </Routes>
           <Footer />
         </div>
