@@ -57,6 +57,16 @@ export default function HomeScreen() {
     };
   });
 
+  const getTimeOfDay = () => {
+    const hours = new Date().getHours();
+    if (hours >= 0 && hours < 12) return 'morning';
+    if (hours >= 12 && hours < 15) return 'afternoon';
+    if (hours >= 15 && hours < 19) return 'evening';
+    return "day isn't it";
+  };
+
+  const time = getTimeOfDay();
+
   const handleSearch = () => {
     router.push({
       pathname: '/search',
@@ -134,7 +144,7 @@ export default function HomeScreen() {
         <Animated.View style={[styles.header, animatedStyle]}>
           <View style={styles.headerContent}>
             <Text style={styles.greeting}>
-              {user ? `Hello, ${user.name}!` : 'Welcome!'}
+              {user ? `Good ${time}, ${user.name}!` : `Good ${time}`}
             </Text>
             <Text style={styles.subtitle}>Find your perfect ride</Text>
           </View>
@@ -271,6 +281,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: 'Poppins-Bold',
     color: '#1D1D1F',
+    marginTop: 5
   },
   subtitle: {
     fontSize: 16,
