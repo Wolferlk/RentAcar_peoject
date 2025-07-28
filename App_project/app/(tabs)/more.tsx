@@ -9,17 +9,18 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { 
-  Info, 
-  Phone, 
-  Mail, 
-  Star, 
-  Globe, 
-  Shield, 
+import {
+  Info,
+  Phone,
+  Mail,
+  Star,
+  Globe,
+  Shield,
   FileText,
   ChevronRight,
   MessageCircle,
   ExternalLink,
+  CreditCard,
 } from 'lucide-react-native';
 import { router } from 'expo-router';
 import Animated, {
@@ -52,12 +53,12 @@ export default function MoreScreen() {
       'Choose how you would like to contact our admin team:',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Email', 
+        {
+          text: 'Email',
           onPress: () => Linking.openURL('mailto:admin@rentacar.com')
         },
-        { 
-          text: 'Phone', 
+        {
+          text: 'Phone',
           onPress: () => Linking.openURL('tel:+1-555-RENTCAR')
         },
       ]
@@ -84,13 +85,17 @@ export default function MoreScreen() {
     );
   };
 
-  const MenuItem = ({ 
-    icon: Icon, 
-    title, 
-    subtitle, 
-    onPress, 
+  const handlePayment = () => {
+    router.push('/payment');
+  };
+
+  const MenuItem = ({
+    icon: Icon,
+    title,
+    subtitle,
+    onPress,
     showChevron = true,
-    iconColor = '#007AFF' 
+    iconColor = '#007AFF'
   }: any) => (
     <Animated.View entering={FadeIn.delay(100)}>
       <TouchableOpacity
@@ -158,8 +163,22 @@ export default function MoreScreen() {
           </View>
         </Animated.View>
 
+        {/* Payment Section */}
+        <Animated.View style={styles.section} entering={FadeIn.delay(150)}>
+          <Text style={styles.sectionTitle}>Payment & Billing</Text>
+          <View style={styles.menuContainer}>
+            <MenuItem
+              icon={CreditCard}
+              title="Payment Methods"
+              subtitle="Manage your payment options"
+              onPress={handlePayment}
+              iconColor="#4CAF50"
+            />
+          </View>
+        </Animated.View>
+
         {/* Contact & Support Section */}
-        <Animated.View style={styles.section} entering={FadeIn.delay(200)}>
+        <Animated.View style={styles.section} entering={FadeIn.delay(250)}>
           <Text style={styles.sectionTitle}>Contact & Support</Text>
           <View style={styles.menuContainer}>
             <MenuItem
@@ -187,7 +206,7 @@ export default function MoreScreen() {
         </Animated.View>
 
         {/* Reviews & Feedback Section */}
-        <Animated.View style={styles.section} entering={FadeIn.delay(300)}>
+        <Animated.View style={styles.section} entering={FadeIn.delay(350)}>
           <Text style={styles.sectionTitle}>Reviews & Feedback</Text>
           <View style={styles.menuContainer}>
             <MenuItem
@@ -201,14 +220,14 @@ export default function MoreScreen() {
               icon={Star}
               title="Rate Our App"
               subtitle="Help us improve"
-              onPress={() => router.push('/feedbackForm')}
+              onPress={handleRateApp}
               iconColor="#FF9800"
             />
           </View>
         </Animated.View>
 
         {/* Quick Actions */}
-        <Animated.View style={styles.section} entering={FadeIn.delay(400)}>
+        <Animated.View style={styles.section} entering={FadeIn.delay(450)}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActionsContainer}>
             <TouchableOpacity
@@ -221,7 +240,7 @@ export default function MoreScreen() {
               </View>
               <Text style={styles.quickActionTitle}>Help Center</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={styles.quickActionCard}
               onPress={() => router.push('/faq')}
@@ -232,7 +251,7 @@ export default function MoreScreen() {
               </View>
               <Text style={styles.quickActionTitle}>FAQ</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={styles.quickActionCard}
               onPress={handleOpenWeb}
@@ -247,7 +266,7 @@ export default function MoreScreen() {
         </Animated.View>
 
         {/* App Details */}
-        <Animated.View style={styles.appDetails} entering={FadeIn.delay(500)}>
+        <Animated.View style={styles.appDetails} entering={FadeIn.delay(550)}>
           <Text style={styles.appName}>RentACar</Text>
           <Text style={styles.appVersion}>Version 1.0.0</Text>
           <Text style={styles.appDescription}>
