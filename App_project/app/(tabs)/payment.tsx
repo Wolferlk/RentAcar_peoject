@@ -40,7 +40,6 @@ export default function PaymentScreen() {
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Payment Method</Text>
-            <Text style={styles.stepText}>Step 3 of 4</Text>
           </View>
           <Text style={styles.sectionSubtitle}>Please enter your payment method</Text>
           <View style={styles.radioRow}>
@@ -87,7 +86,6 @@ export default function PaymentScreen() {
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Confirmation</Text>
-            <Text style={styles.stepText}>Step 4 of 4</Text>
           </View>
           <Text style={styles.sectionSubtitle}>We are getting to the end. Just a few clicks and your rental is ready!</Text>
           <View style={styles.checkboxRow}>
@@ -159,10 +157,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-SemiBold',
     color: '#1D1D1F',
   },
-  stepText: {
-    fontSize: 12,
-    color: '#8E8E93',
-  },
+
   sectionSubtitle: {
     fontSize: 13,
     color: '#8E8E93',

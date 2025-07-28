@@ -20,6 +20,7 @@ import {
   ChevronRight,
   MessageCircle,
   ExternalLink,
+  CreditCard,
 } from 'lucide-react-native';
 import { router } from 'expo-router';
 import Animated, {
@@ -82,6 +83,10 @@ export default function MoreScreen() {
         { text: 'Rate Now', onPress: () => console.log('Opening app store') },
       ]
     );
+  };
+
+  const handlePayment = () => {
+    router.push('/payment');
   };
 
   const MenuItem = ({ 
@@ -158,8 +163,22 @@ export default function MoreScreen() {
           </View>
         </Animated.View>
 
+        {/* Payment Section */}
+        <Animated.View style={styles.section} entering={FadeIn.delay(150)}>
+          <Text style={styles.sectionTitle}>Payment & Billing</Text>
+          <View style={styles.menuContainer}>
+            <MenuItem
+              icon={CreditCard}
+              title="Payment Methods"
+              subtitle="Manage your payment options"
+              onPress={handlePayment}
+              iconColor="#4CAF50"
+            />
+          </View>
+        </Animated.View>
+
         {/* Contact & Support Section */}
-        <Animated.View style={styles.section} entering={FadeIn.delay(200)}>
+        <Animated.View style={styles.section} entering={FadeIn.delay(250)}>
           <Text style={styles.sectionTitle}>Contact & Support</Text>
           <View style={styles.menuContainer}>
             <MenuItem
@@ -187,7 +206,7 @@ export default function MoreScreen() {
         </Animated.View>
 
         {/* Reviews & Feedback Section */}
-        <Animated.View style={styles.section} entering={FadeIn.delay(300)}>
+        <Animated.View style={styles.section} entering={FadeIn.delay(350)}>
           <Text style={styles.sectionTitle}>Reviews & Feedback</Text>
           <View style={styles.menuContainer}>
             <MenuItem
@@ -208,7 +227,7 @@ export default function MoreScreen() {
         </Animated.View>
 
         {/* Quick Actions */}
-        <Animated.View style={styles.section} entering={FadeIn.delay(400)}>
+        <Animated.View style={styles.section} entering={FadeIn.delay(450)}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActionsContainer}>
             <TouchableOpacity
@@ -247,7 +266,7 @@ export default function MoreScreen() {
         </Animated.View>
 
         {/* App Details */}
-        <Animated.View style={styles.appDetails} entering={FadeIn.delay(500)}>
+        <Animated.View style={styles.appDetails} entering={FadeIn.delay(550)}>
           <Text style={styles.appName}>RentACar</Text>
           <Text style={styles.appVersion}>Version 1.0.0</Text>
           <Text style={styles.appDescription}>
