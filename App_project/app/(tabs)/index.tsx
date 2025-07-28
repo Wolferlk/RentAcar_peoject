@@ -154,51 +154,32 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* Search Section */}
-        <Animated.View style={[styles.searchSection, animatedStyle]}>
-          <View style={styles.searchContainer}>
-            <View style={styles.searchInputContainer}>
-              <Search size={20} color="#8E8E93" />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search cars..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholderTextColor="#8E8E93"
-              />
-            </View>
+        <View style={styles.searchBarContainer}>
+          <Search size={18} color="#8E8E93" />
+          <TextInput
+            style={styles.searchBarInput}
+            placeholder="Search vehicles"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#8E8E93"
+          />
+        </View>
 
-            <View style={styles.filterRow}>
-              <View style={styles.filterItem}>
-                <MapPin size={16} color="#8E8E93" />
-                <TextInput
-                  style={styles.filterInput}
-                  placeholder="Location"
-                  value={selectedLocation}
-                  onChangeText={setSelectedLocation}
-                  placeholderTextColor="#8E8E93"
-                />
-              </View>
-
-              <View style={styles.filterItem}>
-                <Calendar size={16} color="#8E8E93" />
-                <TextInput
-                  style={styles.filterInput}
-                  placeholder="Date"
-                  value={selectedDate}
-                  onChangeText={setSelectedDate}
-                  placeholderTextColor="#8E8E93"
-                />
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={styles.searchButton}
-              onPress={handleSearch}
-            >
-              <Text style={styles.searchButtonText}>Search Cars</Text>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
+        {/* Promo Banner */}
+        <View style={styles.promoBanner}>
+          <Text style={styles.promoTitle}>The Best Platform for Car Rental</Text>
+          <Text style={styles.promoSubtitle}>
+            Ease of doing a car rental safely and reliably. Of course at a low price.
+          </Text>
+          <TouchableOpacity style={styles.promoButton}>
+            <Text style={styles.promoButtonText}>Rental Car</Text>
+          </TouchableOpacity>
+          <Image
+            source={{ uri: 'https://cdn.pixabay.com/photo/2012/05/29/00/43/car-49278_1280.png' }}
+            style={styles.promoImage}
+            resizeMode="contain"
+          />
+        </View>
 
         {/* Featured Cars */}
         <Animated.View style={[styles.section, animatedStyle]}>
@@ -510,4 +491,85 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     color: '#1D1D1F',
   },
+  welcomeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  welcomeText: {
+    fontSize: 20,
+    fontFamily: 'Poppins-Bold',
+    color: '#1D1D1F',
+  },
+  avatarContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+  },
+  searchBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F3F5',
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  searchBarInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#1D1D1F',
+  },
+  promoBanner: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    backgroundColor: '#007AFF10',
+    borderRadius: 16,
+    padding: 16,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  promoTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins-Bold',
+    color: '#1D1D1F',
+    marginBottom: 4,
+  },
+  promoSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#5E5E5E',
+    marginBottom: 12,
+  },
+  promoButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignSelf: 'flex-start',
+    zIndex: 1,
+  },
+  promoButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+  },
+  promoImage: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 120,
+    height: 60,
+  },
+
 });
