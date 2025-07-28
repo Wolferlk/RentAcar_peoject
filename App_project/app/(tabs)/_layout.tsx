@@ -75,6 +75,18 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="payment"
+        options={{
+          href: null, // This hides the tab from the tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="term&con"
+        options={{
+          href: null, // This hides the tab from the tab bar
+        }}
+      />
     </Tabs>
   );
 }

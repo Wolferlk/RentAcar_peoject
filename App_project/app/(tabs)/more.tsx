@@ -145,7 +145,7 @@ export default function MoreScreen() {
               icon={FileText}
               title="Terms & Conditions"
               subtitle="Read our terms of service"
-              onPress={() => router.push('/terms')}
+              onPress={() => router.push('/term&con')}
               iconColor="#FF9800"
             />
             <MenuItem
