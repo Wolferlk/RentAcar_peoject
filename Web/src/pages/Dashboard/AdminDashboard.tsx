@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { Users, Calendar, DollarSign, Clock, TrendingUp, TrendingDown, Eye, Download, Filter } from "lucide-react"
+import { Users, Calendar, DollarSign, Clock, TrendingUp, TrendingDown, FileText, FileSpreadsheet } from "lucide-react"
 
 const AdminDashboard: React.FC = () => {
   const metrics = [
