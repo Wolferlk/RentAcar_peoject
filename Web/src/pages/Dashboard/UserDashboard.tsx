@@ -352,9 +352,12 @@ const UserDashboard: React.FC = () => {
                             View Vehicle
                           </Link>
                           {booking.status === 'completed' && (
-                            <button className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors text-sm">
+                            <Link
+                              to={`/write-review/${booking.vehicleId}`} // Navigate to the review page with vehicle ID
+                              className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors text-sm"
+                            >
                               Write Review
-                            </button>
+                            </Link>
                           )}
                           {booking.status === 'confirmed' && (
                             <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
