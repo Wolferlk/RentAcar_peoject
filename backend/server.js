@@ -1,23 +1,86 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import userRoutes from './routes/userRoutes.js';
-import carRoutes from './routes/carRoutes.js';
-import authRoutes from './routes/authRoutes.js';
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
 
-dotenv.config();
+// require('./config/googlePassport');
+
+
+
+const passport = require('passport');
+const cookieParser = require('cookie-parser');
+
 const app = express();
-app.use(cors());
+const DatabaseConfig = require('./config/dbConfig');
+
+const allowedOrigins = [
+  process.env.CLIENT_URL,   
+  process.env.ADMIN_URL     
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
+app.use(cookieParser());
+app.use(passport.initialize());
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.log(err));
+//Database Connection
+// uncomment this after defining the mongo uri in .env file
 
-app.use('/api/users', userRoutes);
-app.use('/api/cars', carRoutes);
-app.use('/api/auth', authRoutes);
+// DatabaseConfig(process.env.dbURI);   
 
+
+// Server Connection
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+
+// auth 
+const customerAuth = require("./Routers/Auth/customer/admin-authRouter");
+app.use("/api/auth/customer", customerAuth);
+
+
+
+
+
+// Customer Routers
+
+
+
+
+
+
+
+// Owner Routers
+
+// const ownerContactUs = require("./Routers/Contact/admin/adminContactRouter");
+// app.use("/api/admin/contactus", ownerContactUs);
+
+
+
+// Super Admin Routers  ( Company Dashboard )
+
+// const superAdminContactUs = require("./Routers/Contact/admin/adminContactRouter");
+// app.use("/api/admin/contactus", superAdminContactUs);
+
+
+
+
+app.get('/',(req,res) => {
+        res.send("API is Working")
+})
+
+
+
+
+app.listen(PORT, () => {
+        console.log(`server is running on PORT ${PORT}`)
+})

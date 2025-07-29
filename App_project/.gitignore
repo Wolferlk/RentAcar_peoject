@@ -1,6 +1,6 @@
 # dependencies
 node_modules/
-
+package-lock.json
 # expo
 .expo/
 dist/
@@ -35,4 +35,3 @@ yarn-error.*
 *.tsbuildinfo
 
 
-package-lock.json
