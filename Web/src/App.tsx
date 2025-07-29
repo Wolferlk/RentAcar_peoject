@@ -18,7 +18,7 @@ import AboutPage from './pages/AboutPage';
 import HelpPage from './pages/HelpPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
-
+import WriteReview from './pages/WriteReview';
 
 import ManageAccounts from './pages/ManageAccounts';
 
@@ -57,6 +57,7 @@ function App() {
             <Route path="/help" element={<HelpPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/write-review/:id" element={<WriteReview />} />
 
             <Route path='/manage-accounts' element={<ManageAccounts />} />
 
