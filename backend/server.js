@@ -35,8 +35,7 @@ app.use(passport.initialize());
 //Database Connection
 // uncomment this after defining the mongo uri in .env file
 
-// DatabaseConfig(process.env.dbURI);   
-
+DatabaseConfig(process.env.dbURI);   
 
 // Server Connection
 const PORT = process.env.PORT || 5000;
@@ -46,6 +45,9 @@ const PORT = process.env.PORT || 5000;
 // auth 
 const customerAuth = require("./Routers/Auth/customer/admin-authRouter");
 app.use("/api/auth/customer", customerAuth);
+
+const ownerAuth = require("./Routers/Auth/owner/owner-authRouter");
+app.use("/api/auth/owner", ownerAuth);
 
 
 
