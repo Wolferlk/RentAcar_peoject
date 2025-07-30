@@ -15,13 +15,15 @@ export default function BookingRequestsScreen() {
     {
       id: '1',
       user: 'John Doe',
+      mobile: '+94 712345678',
       date: '2025-07-26',
       car: 'Toyota Prius',
       status: 'pending',
     },
-    { 
+    {
       id: '2',
       user: 'Jane Smith',
+      mobile: '+94 762345678',
       date: '2025-07-27',
       car: 'Honda Civic',
       status: 'pending',
@@ -40,28 +42,30 @@ export default function BookingRequestsScreen() {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.name}>{item.user}</Text>
-      <Text style={styles.info}>Car: {item.car}</Text>
-      <Text style={styles.info}>Date: {item.date}</Text>
-      <Text style={styles.status}>
-        Status:{' '}
+      <View style={styles.separator} />
+      <Text style={styles.info}>📞 {item.mobile}</Text>
+      <Text style={styles.info}>🚗 {item.car}</Text>
+      <Text style={styles.info}>📅 {item.date}</Text>
+      <View style={styles.statusRow}>
+        <Text style={styles.statusLabel}>Status:</Text>
         <Text
-          style={{
-            color:
-              item.status === 'approved'
-                ? 'green'
-                : item.status === 'rejected'
-                ? 'red'
-                : '#999',
-          }}
+          style={[
+            styles.statusValue,
+            item.status === 'approved'
+              ? styles.approved
+              : item.status === 'rejected'
+              ? styles.rejected
+              : styles.pending,
+          ]}
         >
           {item.status.toUpperCase()}
         </Text>
-      </Text>
+      </View>
 
       {item.status === 'pending' && (
         <View style={styles.actionRow}>
           <TouchableOpacity
-            style={styles.approveBtn}
+            style={[styles.actionBtn, styles.approveBtn]}
             onPress={() => handleAction(item.id, 'approve')}
           >
             <CheckCircle color="white" size={18} />
@@ -69,7 +73,7 @@ export default function BookingRequestsScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.rejectBtn}
+            style={[styles.actionBtn, styles.rejectBtn]}
             onPress={() => handleAction(item.id, 'reject')}
           >
             <XCircle color="white" size={18} />
@@ -82,7 +86,7 @@ export default function BookingRequestsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Booking Requests</Text>
+      <Text style={styles.header}>🚘 Booking Requests</Text>
       <FlatList
         data={requests}
         keyExtractor={(item) => item.id}
@@ -96,69 +100,103 @@ export default function BookingRequestsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#E2E8F0',
   },
   header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    margin: 16,
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginVertical: 20,
     textAlign: 'center',
   },
   list: {
     paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingBottom: 24,
   },
   card: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 2,
+    backgroundColor: '#FFFFFF',
+    padding: 18,
+    borderRadius: 20,
+    marginBottom: 18,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.07,
+    shadowRadius: 12,
+    elevation: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: '#3B82F6',
   },
   name: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 6,
   },
   info: {
-    fontSize: 14,
-    color: '#555',
-    marginTop: 4,
+    fontSize: 15,
+    color: '#475569',
+    marginTop: 2,
   },
-  status: {
-    marginTop: 6,
-    fontWeight: '500',
+  separator: {
+    height: 1,
+    backgroundColor: '#E5E7EB',
+    marginVertical: 8,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  statusLabel: {
+    fontSize: 14,
+    color: '#334155',
+    fontWeight: '600',
+  },
+  statusValue: {
+    marginLeft: 8,
+    fontWeight: '700',
+    paddingVertical: 2,
+    paddingHorizontal: 10,
+    borderRadius: 14,
+    fontSize: 13,
+  },
+  approved: {
+    backgroundColor: '#DCFCE7',
+    color: '#16A34A',
+  },
+  rejected: {
+    backgroundColor: '#FEE2E2',
+    color: '#DC2626',
+  },
+  pending: {
+    backgroundColor: '#E0F2FE',
+    color: '#0284C7',
   },
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 12,
+    marginTop: 16,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    flex: 1,
+    justifyContent: 'center',
   },
   approveBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#22C55E',
-    padding: 10,
-    borderRadius: 8,
-    flex: 1,
+    backgroundColor: '#16A34A',
     marginRight: 8,
-    justifyContent: 'center',
   },
   rejectBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EF4444',
-    padding: 10,
-    borderRadius: 8,
-    flex: 1,
+    backgroundColor: '#DC2626',
     marginLeft: 8,
-    justifyContent: 'center',
   },
   btnText: {
-    color: 'white',
-    marginLeft: 6,
-    fontWeight: '500',
+    color: '#FFF',
+    marginLeft: 8,
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
