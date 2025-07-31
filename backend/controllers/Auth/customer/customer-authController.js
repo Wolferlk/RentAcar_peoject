@@ -1,4 +1,4 @@
-const User = require('../../../Models/userModel');
+const User = require('../../../Models/customerModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
 
 const { createToken } = require('../../../Utils/jwtUtil');
@@ -48,10 +48,20 @@ async function addUser(req, res) {
 
             }
 
+            // Get cookie name from environment variable based on user role
+            const cookieName = process.env.CUSTOMER_COOKIE_NAME;
+
             // sending success Response
-            return res.status(200).cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict', maxAge: 1000 * 60 * 60 * 24 * 5 }).json({ message: "User Registration Successfull" });
-
-
+            return res.status(200)
+                .cookie(cookieName, token, { 
+                    httpOnly: true, 
+                    secure: process.env.NODE_ENV === 'production', 
+                    sameSite: 'Strict', maxAge: 1000 * 60 * 60 * 24 * 5 
+                })
+                .json({ 
+                    message: "User Registration Successfull" ,
+                    userRole: newUser.userRole
+                });
         }
 
     } catch (error) {
@@ -103,9 +113,8 @@ async function loginUser(req, res) {
         const token = createToken(payload);
 
         // Choose cookie name based on role
-        const cookieName = (existUser.userRole === 'admin' || existUser.userRole === 'super admin')
-            ? 'adminToken'
-            : 'token';
+        // Get cookie name from environment variable based on user role
+        const cookieName = process.env.CUSTOMER_COOKIE_NAME;
 
         res.cookie(cookieName, token, {
             httpOnly: true,
@@ -125,11 +134,17 @@ async function loginUser(req, res) {
 }
 
 async function logoutUser(req, res) {
-    res.clearCookie('token', {
+    
+    // Clear all possible cookies using environment variable names
+    const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict'
-    });
+    };
+
+    res.clearCookie(process.env.CUSTOMER_COOKIE_NAME, cookieOptions);
+    res.clearCookie(process.env.OWNER_COOKIE_NAME, cookieOptions);
+    res.clearCookie(process.env.SUPER_ADMIN_COOKIE_NAME, cookieOptions);
 
     return res.status(200).json({ message: 'Logout successful' });
 }
@@ -153,9 +168,11 @@ async function findOrCreateGoogleUser(profile) {
             firstName: profile.name.givenName || '',
             lastName: profile.name.familyName || '',
             email: profile.emails?.[0]?.value || '',
-            photo: profile.photos[0]?.value || ''
+            photo: profile.photos[0]?.value || '',
+            userRole: 'customer'
         });
 
+        console.log('New Google user created:', newUser.email);
         return newUser;
 
     } catch (error) {
@@ -166,37 +183,30 @@ async function findOrCreateGoogleUser(profile) {
 async function googleLoginUser(req, res) {
 
     try {
-
-
         const payload = {
-
             id: req.user._id.toString(),
-
             googleId: req.user.googleId,
-
             email: req.user.email,
-
             userRole: req.user.userRole
         }
 
         const token = createToken(payload);
+        const cookieName = process.env.CUSTOMER_COOKIE_NAME;
 
         res.status(200)
-            .cookie('token', token, {
+            .cookie(cookieName, token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'Strict', maxAge: 1000 * 60 * 60 * 24 * 5     // 5 days 
+                sameSite: 'Strict', 
+                maxAge: 1000 * 60 * 60 * 24 * 5     // 5 days 
             })
 
         return res.redirect(process.env.CLIENT_URL);
-
-
     
     } catch (error) {
 
         // Email Validation
         if (error.name === "ValidationError") {
-
             return res.status(400).json({ message: "Invalid Email format" });
         }
         // Other Errors

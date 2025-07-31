@@ -2,8 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
-
-// require('./config/googlePassport');
+require('./config/googlePassport');
 
 
 

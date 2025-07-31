@@ -44,6 +44,22 @@ function verifyAdminToken(req, res, next) {
 
 }
 
+function verifyCustomerToken(req, res, next) {
+    const token = req.cookies[process.env.CUSTOMER_COOKIE_NAME];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Access Denied. Customer Login Required!' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(403).json({ message: 'Server Error', error: error.message });
+    }
+}
+
 function verifyOwnerToken(req, res, next) {
     const tokenName = process.env.OWNER_COOKIE_NAME
     const token = req.cookies[tokenName];
@@ -65,4 +81,5 @@ function verifyOwnerToken(req, res, next) {
 
 }
 
-module.exports = { verifyToken, verifyAdminToken, verifyOwnerToken };
+
+module.exports = { verifyToken, verifyAdminToken, verifyOwnerToken, verifyCustomerToken };
