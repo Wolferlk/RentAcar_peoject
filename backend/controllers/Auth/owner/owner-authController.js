@@ -1,4 +1,4 @@
-const User = require('../../../Models/userModel');
+const Owner = require('../../../Models/ownerModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
 
 const { createToken } = require('../../../Utils/jwtUtil');
@@ -13,29 +13,28 @@ async function registerOwner(req, res) {
             return res.status(400).json({ message: 'Email, Passowrd and FirstName Fields are Required' });
         }
 
-        // Check user already exsist with this email first
-        const isUserExsist = await User.findOne({ email });
-        if (isUserExsist) {
-            return res.status(409).json({ message: "User Email Already Exsist" });
+        // Check owner already exsist with this email first
+        const isOwnerExsist = await Owner.findOne({ email });
+        if (isOwnerExsist) {
+            return res.status(409).json({ message: "Owner Email Already Exsist" });
         }
 
         // Hash Password
         const hashedPassword = await hashPassword(password);
 
-        // Add new owner user to the database
-        const newUser = await User.create({ 
+        // Add new owner owner to the database
+        const newOwner = await Owner.create({ 
             email, 
             password: hashedPassword, 
             firstName, 
             lastName,
-            userRole: 'owner' 
         });
 
-        if (newUser) {
+        if (newOwner) {
             const payload = {
-                id: newUser._id.toString(),
-                email: newUser.email,
-                userRole: newUser.userRole
+                id: newOwner._id.toString(),
+                email: newOwner.email,
+                userRole: 'owner'
             }
 
             const token = createToken(payload);
@@ -51,12 +50,12 @@ async function registerOwner(req, res) {
                 secure: process.env.NODE_ENV === 'production', 
                 sameSite: 'Strict', 
                 maxAge: 1000 * 60 * 60 * 24 * 5 
-            }).json({ message: "User Registration Successfull" });
+            }).json({ message: "Owner Registration Successfull" });
         }
     } catch (error) {
         if (error.code === 11000) {
             console.warn("Duplicate slipped through:", email);
-            return res.status(409).json({ message: "User Email Already Exsist" });
+            return res.status(409).json({ message: "Owner's Email Already Exsist" });
         }
 
         // Email Validation
@@ -77,26 +76,28 @@ async function loginOwner(req, res) {
     }
 
     try {
-        const existUser = await User.findOne({ email });
+        const existOwner = await Owner.findOne({ email });
 
-        if (!existUser) {
+        if (!existOwner) {
             return res.status(400).json({ message: "Invalid Email" });
         }
 
-        if (existUser.userRole !== 'owner') {
-            return res.status(403).json({ message: "Access denied. This login is for car owners only." });
-        }
-
-        const isPassMatch = await checkPassword(password, existUser.password);
+        const isPassMatch = await checkPassword(password, existOwner.password);
 
         if (!isPassMatch) {
             return res.status(400).json({ message: "Invalid Password" });
         }
 
+        if (!existOwner.isApproved) {
+            return res.status(403).json({ 
+                message: "Your account is pending approval by an administrator"
+            });
+        }
+
         const payload = {
-            id: existUser._id.toString(),
-            email: existUser.email,
-            userRole: existUser.userRole,
+            id: existOwner._id.toString(),
+            email: existOwner.email,
+            userRole: 'owner',
         };
 
         const token = createToken(payload);
@@ -111,7 +112,7 @@ async function loginOwner(req, res) {
             maxAge: 1000 * 60 * 60 * 24 * 5, // 5 days
         });
 
-        return res.status(200).json({ message: "Login Successful", userRole: existUser.userRole });
+        return res.status(200).json({ message: "Owner Login Successful" });
 
     } catch (error) {
         if (error.name === "ValidationError") {
