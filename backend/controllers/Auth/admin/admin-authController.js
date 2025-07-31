@@ -1,6 +1,6 @@
 const User = require('../../../Models/superAdminModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
-const { createToken } = require('../../../Utils/jwtUtil');
+const { createToken,createRefreshToken } = require('../../../utils/jwtUtil');
 
 // Add Super Admin
 async function addSuperAdmin(req, res) {
@@ -57,6 +57,7 @@ async function addSuperAdmin(req, res) {
     }
 }
 
+
 // Login Super Admin
 async function loginSuperAdmin(req, res) {
     const { email, password } = req.body;
@@ -66,8 +67,7 @@ async function loginSuperAdmin(req, res) {
     }
 
     try {
-        const existUser = await User.findOne({ email, userRole: 'super-admin' });  // ✅ fixed role match
-
+        const existUser = await User.findOne({ email, userRole: 'super-admin' });
         if (!existUser) {
             return res.status(400).json({ message: "Invalid Email or Not a Super Admin" });
         }
@@ -83,21 +83,25 @@ async function loginSuperAdmin(req, res) {
             userRole: existUser.userRole,
         };
 
-        const token = createToken(payload);
+        const accessToken = createToken(payload);
+        const refreshToken = createRefreshToken(payload);
 
-        res.cookie('superadmintoken', token, {  // ✅ unified cookie name
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict',
-            maxAge: 1000 * 60 * 60 * 24 * 5
-        });
-
-        return res.status(200).json({ message: "Super Admin Login Successful", userRole: existUser.userRole, token });
+        res
+            .cookie('superadmintoken', accessToken, { httpOnly: true })
+            .cookie('superadminrefreshtoken', refreshToken, { httpOnly: true })
+            .status(200)
+            .json({
+                message: "Super Admin Login Successful",
+                userRole: existUser.userRole,
+                accessToken,
+                refreshToken
+            });
 
     } catch (error) {
         return res.status(500).json({ message: 'Server Error', error: error.message });
     }
 }
+
 
 // Logout Super Admin
 async function logoutSuperAdmin(req, res) {

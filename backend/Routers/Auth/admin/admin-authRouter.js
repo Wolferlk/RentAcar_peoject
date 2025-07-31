@@ -4,12 +4,31 @@ const router = express.Router();
 const { addSuperAdmin, loginSuperAdmin, logoutSuperAdmin } = require('../../../controllers/Auth/admin/admin-authController');
 const {verifySuperAdminToken} = require('../../../middleware/Auth/verifyToken');
 const {isSuperAdmin}  = require('../../../middleware/Auth/authorization');
-
+const { verifyRefreshToken, createAccessToken } = require('../../../utils/jwtUtil');
 // Route to add new Super Admin (protected by secret key)
 router.post('/add', addSuperAdmin);
 
 // Super Admin login
 router.post('/login', loginSuperAdmin);
+
+
+router.post('/refresh', async (req, res) => {
+    const refreshToken = req.cookies.superadminrefreshtoken;
+    if (!refreshToken) return res.status(401).json({ message: "No Refresh Token" });
+
+    try {
+        const decoded = verifyRefreshToken(refreshToken);
+        const newAccessToken = createToken({
+            id: decoded.id,
+            email: decoded.email,
+            userRole: decoded.userRole
+        });
+        res.cookie('superadmintoken', newAccessToken, { httpOnly: true });
+        res.json({ message: "Access token refreshed" });
+    } catch (err) {
+        res.status(403).json({ message: "Invalid Refresh Token" });
+    }
+});
 
 // Super Admin logout
 router.post('/logout', logoutSuperAdmin);
