@@ -72,9 +72,7 @@ app.use("/api/auth/customer", customerAuth);
 const superadminAuthRouter = require('./Routers/Auth/admin/admin-authRouter');
 app.use("/api/superadmin/auth", superadminAuthRouter);
 
-router.post('/add', addSuperAdmin);
-router.post('/login', loginSuperAdmin);
-router.post('/logout', logoutSuperAdmin);
+
 
 
 
