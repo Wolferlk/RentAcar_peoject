@@ -23,7 +23,7 @@ const ownerSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    
+
     photo: {
         type: String,
         default: null
@@ -44,6 +44,11 @@ const ownerSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
         description: "Indicates whether the owner is approved by super admin"
+    },
+
+    refreshToken: {
+        type: String,
+        default: null
     },
 
     createdAt: {
