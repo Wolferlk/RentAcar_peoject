@@ -22,8 +22,8 @@ function verifyToken(req, res, next) {
     }
 
 }
-function verifyAdminToken(req, res, next) {
-    const token = req.cookies.adminToken ;
+function verifySuperAdminToken(req, res, next) {
+    const token = req.cookies.superadmintoken ;
 
     if (!token) {
         return res.status(401).json({ message: 'Access Denied.  Admin Privilages Required !' });
@@ -81,5 +81,5 @@ function verifyOwnerToken(req, res, next) {
 
 }
 
+module.exports = { verifyToken, verifySuperAdminToken, verifyOwnerToken, verifyCustomerToken };
 
-module.exports = { verifyToken, verifyAdminToken, verifyOwnerToken, verifyCustomerToken };

@@ -1,4 +1,4 @@
-const User = require('../../../Models/userModel');
+const User = require('../../../Models/superAdminModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
 const { createToken } = require('../../../Utils/jwtUtil');
 
@@ -6,8 +6,9 @@ const { createToken } = require('../../../Utils/jwtUtil');
 async function addSuperAdmin(req, res) {
     try {
         const { email, password, firstName, lastName, secretKey } = req.body;
+          console.log('Env SUPER_ADMIN_SECRET:', process.env.SUPER_ADMIN_SECRET);
+        console.log('Received secretKey:', secretKey);
 
-        
         //  Security: require a secret key to create a super admin
 
         if (secretKey !== process.env.SUPER_ADMIN_SECRET) {

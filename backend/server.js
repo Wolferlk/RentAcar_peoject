@@ -71,7 +71,7 @@ app.use("/api/auth/owner", ownerAuth);
 // Super Admin Routers  ( Company Dashboard )
 
 const superadminAuthRouter = require('./Routers/Auth/admin/admin-authRouter');
-app.use("/api/superadmin/auth", superadminAuthRouter);
+app.use("/api/auth/superadmin", superadminAuthRouter);
 
 
 
