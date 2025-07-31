@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 // require('./config/googlePassport');
@@ -7,7 +8,7 @@ require('dotenv').config();
 
 
 const passport = require('passport');
-const cookieParser = require('cookie-parser');
+
 
 const app = express();
 const DatabaseConfig = require('./config/dbConfig');
@@ -68,9 +69,12 @@ app.use("/api/auth/customer", customerAuth);
 
 // Super Admin Routers  ( Company Dashboard )
 
-// const superAdminContactUs = require("./Routers/Contact/admin/adminContactRouter");
-// app.use("/api/admin/contactus", superAdminContactUs);
+const superadminAuthRouter = require('./Routers/Auth/admin/admin-authRouter');
+app.use("/api/superadmin/auth", superadminAuthRouter);
 
+router.post('/add', addSuperAdmin);
+router.post('/login', loginSuperAdmin);
+router.post('/logout', logoutSuperAdmin);
 
 
 
