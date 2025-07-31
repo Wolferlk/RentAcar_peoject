@@ -1,17 +1,15 @@
 const User = require('../../../Models/userModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
-
 const { createToken } = require('../../../Utils/jwtUtil');
 
-
-
-
-// Signup   Direct Regiter
+// Add Super Admin
 async function addSuperAdmin(req, res) {
     try {
         const { email, password, firstName, lastName, secretKey } = req.body;
 
+        
         //  Security: require a secret key to create a super admin
+
         if (secretKey !== process.env.SUPER_ADMIN_SECRET) {
             return res.status(403).json({ message: 'Unauthorized to create Super Admin' });
         }
@@ -20,16 +18,13 @@ async function addSuperAdmin(req, res) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
-        // Check if a super admin already exists with this email
-        const existUser = await User.findOne({ email, userRole: 'super admin' });
+        const existUser = await User.findOne({ email, userRole: 'super-admin' });
         if (existUser) {
             return res.status(409).json({ message: 'Super Admin with this email already exists' });
         }
 
-        // Hash password
         const hashedPassword = await hashPassword(password);
 
-        // Create Super Admin user
         const newAdmin = await User.create({
             email,
             password: hashedPassword,
@@ -39,7 +34,6 @@ async function addSuperAdmin(req, res) {
             status: 'approved'
         });
 
-        // Create JWT token
         const payload = {
             id: newAdmin._id.toString(),
             email: newAdmin.email,
@@ -49,11 +43,11 @@ async function addSuperAdmin(req, res) {
         const token = createToken(payload);
 
         res.status(201)
-            .cookie('SuperAdminToken', token, {
+            .cookie('superadmintoken', token, {   // ✅ unified cookie name
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'Strict',
-                maxAge: 1000 * 60 * 60 * 24 * 5 // 5 days
+                maxAge: 1000 * 60 * 60 * 24 * 5
             })
             .json({ message: 'Super Admin created successfully', userRole: newAdmin.userRole });
 
@@ -62,7 +56,7 @@ async function addSuperAdmin(req, res) {
     }
 }
 
-
+// Login Super Admin
 async function loginSuperAdmin(req, res) {
     const { email, password } = req.body;
 
@@ -71,14 +65,13 @@ async function loginSuperAdmin(req, res) {
     }
 
     try {
-        const existUser = await User.findOne({ email , userRole: 'super admin'});
+        const existUser = await User.findOne({ email, userRole: 'super-admin' });  // ✅ fixed role match
 
         if (!existUser) {
             return res.status(400).json({ message: "Invalid Email or Not a Super Admin" });
         }
 
         const isPassMatch = await checkPassword(password, existUser.password);
-
         if (!isPassMatch) {
             return res.status(400).json({ message: "Invalid Password" });
         }
@@ -91,27 +84,23 @@ async function loginSuperAdmin(req, res) {
 
         const token = createToken(payload);
 
-        // Always use 'superadmintoken' for super admin
-        res.cookie('superadmintoken', token, {
+        res.cookie('superadmintoken', token, {  // ✅ unified cookie name
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'Strict',
-            maxAge: 1000 * 60 * 60 * 24 * 5, // 5 days
+            maxAge: 1000 * 60 * 60 * 24 * 5
         });
 
-        return res.status(200).json({ message: "Super Admin Login Successful", userRole: existUser.userRole,token });
+        return res.status(200).json({ message: "Super Admin Login Successful", userRole: existUser.userRole, token });
 
     } catch (error) {
-        if (error.name === "ValidationError") {
-            return res.status(400).json({ message: "Invalid Email format" });
-        }
         return res.status(500).json({ message: 'Server Error', error: error.message });
     }
 }
 
-// Super Admin Logout
+// Logout Super Admin
 async function logoutSuperAdmin(req, res) {
-    res.clearCookie('superadmintoken', {
+    res.clearCookie('superadmintoken', {   // ✅ unified cookie name
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict'
@@ -119,8 +108,4 @@ async function logoutSuperAdmin(req, res) {
     return res.status(200).json({ message: 'Super Admin logout successful' });
 }
 
-
-
-
-
-module.exports = { addSuperAdmin, loginSuperAdmin, logoutSuperAdmin }
+module.exports = { addSuperAdmin, loginSuperAdmin, logoutSuperAdmin };
