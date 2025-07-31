@@ -1,7 +1,8 @@
+const { verify } = require('jsonwebtoken');
 const Owner = require('../../../Models/ownerModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
 
-const { createToken } = require('../../../Utils/jwtUtil');
+const { createToken, createRefreshToken, verifyRefreshToken } = require('../../../Utils/jwtUtil');
 
 // Direct Registration For Owner
 async function registerOwner(req, res) {
@@ -37,20 +38,35 @@ async function registerOwner(req, res) {
                 userRole: 'owner'
             }
 
-            const token = createToken(payload);
+            const accessToken = createToken(payload);
+            const refreshToken = createRefreshToken(payload);
 
-            if (!token) {
+            if (!accessToken || !refreshToken) {
                 return res.status(500).json({ message: 'Token Not Generated' });
             }
 
-            // sending success Response
-            const cookieName = process.env.OWNER_COOKIE_NAME;
-            return res.status(200).cookie(cookieName, token, {
+            // Store refresh token in db
+            await Owner.findByIdAndUpdate(newOwner._id, { refreshToken });
+
+            // Set cookies
+            const accessCookieName = process.env.OWNER_COOKIE_NAME;
+            const refreshCookieName = process.env.OWNER_REFRESH_COOKIE_NAME;
+
+            res.cookie(accessCookieName, accessToken, {
                 httpOnly: true, 
                 secure: process.env.NODE_ENV === 'production', 
                 sameSite: 'Strict', 
-                maxAge: 1000 * 60 * 60 * 24 * 5 
-            }).json({ message: "Owner Registration Successfull" });
+                maxAge: 1000 * 60 * 15 // 15 minutes
+            });
+
+            res.cookie(refreshCookieName, refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'Strict',
+                maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+            });
+
+            return res.status(200).json({ message: "Owner Registration Successfull" });
         }
     } catch (error) {
         if (error.code === 11000) {
@@ -100,16 +116,28 @@ async function loginOwner(req, res) {
             userRole: 'owner',
         };
 
-        const token = createToken(payload);
+        const accessToken = createToken(payload);
+        const refreshToken = createRefreshToken(payload);
 
-        // Choose cookie name based on role
-        const cookieName = process.env.OWNER_COOKIE_NAME;
+        // Store refresh token in database
+        await Owner.findByIdAndUpdate(existOwner._id, { refreshToken });
 
-        res.cookie(cookieName, token, {
+        // Set cookies
+        const accessCookieName = process.env.OWNER_COOKIE_NAME;
+        const refreshCookieName = process.env.OWNER_REFRESH_COOKIE_NAME;
+
+        res.cookie(accessCookieName, accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'Strict',
-            maxAge: 1000 * 60 * 60 * 24 * 5, // 5 days
+            maxAge: 1000 * 60 * 15, // 15 minutes
+        });
+
+        res.cookie(refreshCookieName, refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
         });
 
         return res.status(200).json({ message: "Owner Login Successful" });
@@ -122,14 +150,93 @@ async function loginOwner(req, res) {
     }
 }
 
-async function logoutOwner(req, res) {
-    res.clearCookie(process.env.OWNER_COOKIE_NAME, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict'
-    });
+async function refreshOwnerToken(req, res) {
+    try {
+        const refreshCookieName = process.env.OWNER_REFRESH_COOKIE_NAME;
+        const refreshToken = req.cookies[refreshCookieName];
 
-    return res.status(200).json({ message: 'Logout successful' });
+        if (!refreshToken) {
+            return res.status(401).json({ message: 'No refresh token provided' });
+        }
+
+        // Verify the refresh token
+        const decoded = verifyRefreshToken(refreshToken);
+        if (!decoded || decoded.type !== 'refresh') {
+            return res.status(403).json({ message: 'Invalid refresh token' });
+        }
+
+        // Verify owner exists
+        const owner = await Owner.findById(decoded.id);
+        if(!owner || owner.refreshToken !== refreshToken) {
+            return res.status(403).json({ message: 'Invalid refresh token' });
+        }
+
+        // Create new tokens
+        const payload = {
+            id: owner._id.toString(),
+            email: owner.email,
+            userRole: 'owner'
+        };
+
+        const newAccessToken = createToken(payload);
+        const newRefreshToken = createRefreshToken(payload);
+
+        // Update refresh token in database
+        await Owner.findByIdAndUpdate(owner._id, { refreshToken: newRefreshToken });
+
+        // Set new cookies 
+        const accessCookieName = process.env.OWNER_COOKIE_NAME;
+
+        res.cookie(accessCookieName, newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 15, // 15 minutes
+        });
+
+        res.cookie(refreshCookieName, newRefreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        });
+
+        return res.status(200).json({ message: 'Token refreshed successfully' });
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Server Error', error: error.message });
+    }
 }
 
-module.exports = { registerOwner, loginOwner, logoutOwner }
+async function logoutOwner(req, res) {
+    try {
+        const refreshToken = req.cookies[process.env.OWNER_REFRESH_COOKIE_NAME];
+
+        // Remove refresh token from database
+        if (refreshToken) {
+            await Owner.findOneAndUpdate(
+                { refreshToken },
+                { refreshToken: null }
+            );
+        }
+
+        // Clear cookies both refresh and access
+        res.clearCookie(process.env.OWNER_COOKIE_NAME, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict'
+        });
+
+        res.clearCookie(process.env.OWNER_REFRESH_COOKIE_NAME, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict'
+        });
+
+        return res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+}
+
+module.exports = { registerOwner, loginOwner, refreshOwnerToken, logoutOwner }
