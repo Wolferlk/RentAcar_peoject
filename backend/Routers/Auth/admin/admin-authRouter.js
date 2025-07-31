@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { addSuperAdmin, loginSuperAdmin, logoutSuperAdmin } = require('../../../controllers/Auth/admin/admin-authController');
-const verifyToken = require('../../../middleware/Auth/verifyToken');
+const {verifyToken} = require('../../../middleware/Auth/verifyToken');
 const {isSuperAdmin}  = require('../../../middleware/Auth/authorization');
 
 // Route to add new Super Admin (protected by secret key)
