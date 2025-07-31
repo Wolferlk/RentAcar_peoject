@@ -24,7 +24,7 @@ function isSuperAdmin(req, res, next) {
 
     try {
 
-        if (userRole != 'super admin') {
+        if (userRole != 'super-admin') {
             return res.status(403).json({ message: 'Access denied. Super Admin privileges required.' });
         }
 
