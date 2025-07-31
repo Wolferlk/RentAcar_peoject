@@ -7,6 +7,6 @@ const { isAnyAdmin } = require('../../../middleware/Auth/authorization');
 router.route('/register').post(ownerAuthController.registerOwner);
 router.route('/login').post(ownerAuthController.loginOwner);
 
-router.route('/logout').post(verifyOwnerToken, ownerAuthController.logoutOwner);
+router.route('/logout').get(verifyOwnerToken, ownerAuthController.logoutOwner);
 
 module.exports = router;
