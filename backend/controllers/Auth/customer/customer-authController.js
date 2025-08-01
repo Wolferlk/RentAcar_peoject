@@ -1,7 +1,6 @@
 const User = require('../../../Models/customerModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
-
-const { createToken } = require('../../../Utils/jwtUtil');
+const { createToken, createRefreshToken, verifyRefreshToken } = require('../../../Utils/jwtUtil');
 
 
 //Note: this is for to understand and make neccessory changes in this
@@ -14,54 +13,56 @@ async function addUser(req, res) {
     try {
         const { email, password, firstName, lastName } = req.body;
 
-        // check if all fields are not empty
         if (!email || !password || !firstName) {
             return res.status(400).json({ message: 'All Fields Required' });
         }
 
-
-        // check user already exsist with this email first
         const isUserExsist = await User.findOne({ email });
         if (isUserExsist) {
             return res.status(409).json({ message: "User Email Already Exsist" });
         }
 
-        //Hash Password
         const hashedPassword = await hashPassword(password);
 
-        //Add new user to the database
         const newUser = await User.create({ email, password: hashedPassword, firstName, lastName });
         if (newUser) {
-
             const payload = {
                 id: newUser._id.toString(),
                 email: newUser.email,
                 userRole: newUser.userRole
+            };
 
-            }
+            const accessToken = createToken(payload);
+            const refreshToken = createRefreshToken(payload);
 
-            const token = createToken(payload);
+            // Store refresh token in database
+            await User.findByIdAndUpdate(newUser._id, { refreshToken });
 
-
-            if (!token) {
+            if (!accessToken || !refreshToken) {
                 return res.status(500).json({ message: 'Token Not Generated' });
-
             }
 
-            // Get cookie name from environment variable based on user role
-            const cookieName = process.env.CUSTOMER_COOKIE_NAME;
+            const accessCookieName = process.env.CUSTOMER_COOKIE_NAME;
+            const refreshCookieName = process.env.CUSTOMER_REFRESH_COOKIE_NAME;
 
-            // sending success Response
-            return res.status(200)
-                .cookie(cookieName, token, { 
-                    httpOnly: true, 
-                    secure: process.env.NODE_ENV === 'production', 
-                    sameSite: 'Strict', maxAge: 1000 * 60 * 60 * 24 * 5 
-                })
-                .json({ 
-                    message: "User Registration Successfull" ,
-                    userRole: newUser.userRole
-                });
+            res.cookie(accessCookieName, accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'Strict',
+                maxAge: 1000 * 60 * 15 // 15 minutes
+            });
+
+            res.cookie(refreshCookieName, refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'Strict',
+                maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+            });
+
+            return res.status(200).json({
+                message: "User Registration Successfull",
+                userRole: newUser.userRole
+            });
         }
 
     } catch (error) {
@@ -110,17 +111,29 @@ async function loginUser(req, res) {
             userRole: existUser.userRole,
         };
 
-        const token = createToken(payload);
+        const accessToken = createToken(payload);
+        const refreshToken = createRefreshToken(payload);
+
+        // Store refresh token in database
+        await User.findByIdAndUpdate(existUser._id, { refreshToken });
 
         // Choose cookie name based on role
         // Get cookie name from environment variable based on user role
-        const cookieName = process.env.CUSTOMER_COOKIE_NAME;
+        const accessCookieName = process.env.CUSTOMER_COOKIE_NAME;
+        const refreshCookieName = process.env.CUSTOMER_REFRESH_COOKIE_NAME;
 
-        res.cookie(cookieName, token, {
+        res.cookie(accessCookieName, accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'Strict',
-            maxAge: 1000 * 60 * 60 * 24 * 5, // 5 days
+            maxAge: 1000 * 60 * 15, // 15 minutes
+        });
+
+        res.cookie(refreshCookieName, refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
         });
 
         return res.status(200).json({ message: "Login Successful", userRole: existUser.userRole });
@@ -133,20 +146,85 @@ async function loginUser(req, res) {
     }
 }
 
+async function refreshCustomerToken(req, res) {
+    try {
+        const refreshCookieName = process.env.CUSTOMER_REFRESH_COOKIE_NAME;
+        const refreshToken = req.cookies[refreshCookieName];
+
+        if (!refreshToken) {
+            return res.status(401).json({ message: 'Refresh token not found' });
+        }
+
+        // Verify the refresh token
+        const decoded = verifyRefreshToken(refreshToken);
+        if (!decoded || decoded.type !== 'refresh') {
+            return res.status(403).json({ message: 'Invalid refresh token' });
+        }
+
+        // Verify user exists and token matches
+        const user = await User.findById(decoded.id);
+        if (!user || user.refreshToken !== refreshToken) {
+            return res.status(403).json({ message: 'Invalid refresh token' });
+        }
+
+        // Create new tokens
+        const payload = {
+            id: user._id.toString(),
+            email: user.email,
+            userRole: user.userRole
+        };
+
+        const newAccessToken = createToken(payload);
+        const newRefreshToken = createRefreshToken(payload);
+
+        // Update refresh token in database
+        await User.findByIdAndUpdate(user._id, { refreshToken: newRefreshToken });
+
+        const accessCookieName = process.env.CUSTOMER_COOKIE_NAME;
+        const newRefreshCookieName = process.env.CUSTOMER_REFRESH_COOKIE_NAME;
+
+        res.cookie(accessCookieName, newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 15
+        });
+
+        res.cookie(newRefreshCookieName, newRefreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 60 * 24 * 7
+        });
+
+        return res.status(200).json({ message: 'Token refreshed successfully' });
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+}
+
 async function logoutUser(req, res) {
     
-    // Clear all possible cookies using environment variable names
-    const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict'
-    };
+    try {
+        // Clear refresh token from database if user is authenticated
+        if (req.user && req.user.id) {
+            await User.findByIdAndUpdate(req.user.id, { refreshToken: null });
+        }
 
-    res.clearCookie(process.env.CUSTOMER_COOKIE_NAME, cookieOptions);
-    res.clearCookie(process.env.OWNER_COOKIE_NAME, cookieOptions);
-    res.clearCookie(process.env.SUPER_ADMIN_COOKIE_NAME, cookieOptions);
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict'
+        };
 
-    return res.status(200).json({ message: 'Logout successful' });
+        res.clearCookie(process.env.CUSTOMER_COOKIE_NAME, cookieOptions);
+        res.clearCookie(process.env.CUSTOMER_REFRESH_COOKIE_NAME, cookieOptions);
+
+        return res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server Error', error: error.message });
+    }
 }
 
 
@@ -217,4 +295,4 @@ async function googleLoginUser(req, res) {
 
 
 
-module.exports = { addUser, loginUser, logoutUser, findOrCreateGoogleUser, googleLoginUser }
+module.exports = { addUser, loginUser, refreshCustomerToken, logoutUser, findOrCreateGoogleUser, googleLoginUser }

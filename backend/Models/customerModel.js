@@ -50,7 +50,10 @@ const customerSchema = new mongoose.Schema({
 
         default: 'customer'
     },
-
+    refreshToken: {
+        type: String,
+        default: null
+    },
     createdAt: { type: Date, default: Date.now }
 
 },

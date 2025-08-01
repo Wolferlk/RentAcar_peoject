@@ -1,3 +1,4 @@
+
 const router = require('express').Router();
 const passport = require('passport');
 const customerAuthController = require('../../../controllers/Auth/customer/customer-authController');
@@ -11,6 +12,7 @@ router.route('/register').post(customerAuthController.addUser);
 
 router.route('/login').post(customerAuthController.loginUser);
 router.route('/logout').post(customerAuthController.logoutUser);
+router.route('/refresh').post(customerAuthController.refreshCustomerToken);
 
 router.get('/google',
     passport.authenticate('google', { scope: ['profile', 'email'] })

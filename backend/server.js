@@ -43,7 +43,7 @@ const PORT = process.env.PORT || 5000;
 
 
 // auth 
-const customerAuth = require("./Routers/Auth/customer/admin-authRouter");
+const customerAuth = require("./Routers/Auth/customer/customer-authRouter");
 app.use("/api/auth/customer", customerAuth);
 
 const ownerAuth = require("./Routers/Auth/owner/owner-authRouter");
