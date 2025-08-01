@@ -6,7 +6,13 @@ const { isAnyAdmin } = require('../../../middleware/Auth/authorization');
 
 router.route('/register').post(ownerAuthController.registerOwner);
 router.route('/login').post(ownerAuthController.loginOwner);
-router.route('/refresh').get(ownerAuthController.refreshOwnerToken);
 router.route('/logout').get(verifyOwnerToken, ownerAuthController.logoutOwner);
+
+// router.route('/profile').get(verifyOwnerToken, (req,res) => {
+//     res.json({
+//         message: "Test protected route",
+//         user: req.user
+//     });
+// });
 
 module.exports = router;

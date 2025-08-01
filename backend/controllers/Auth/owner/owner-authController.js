@@ -150,64 +150,6 @@ async function loginOwner(req, res) {
     }
 }
 
-async function refreshOwnerToken(req, res) {
-    try {
-        const refreshCookieName = process.env.OWNER_REFRESH_COOKIE_NAME;
-        const refreshToken = req.cookies[refreshCookieName];
-
-        if (!refreshToken) {
-            return res.status(401).json({ message: 'No refresh token provided' });
-        }
-
-        // Verify the refresh token
-        const decoded = verifyRefreshToken(refreshToken);
-        if (!decoded || decoded.type !== 'refresh') {
-            return res.status(403).json({ message: 'Invalid refresh token' });
-        }
-
-        // Verify owner exists
-        const owner = await Owner.findById(decoded.id);
-        if(!owner || owner.refreshToken !== refreshToken) {
-            return res.status(403).json({ message: 'Invalid refresh token' });
-        }
-
-        // Create new tokens
-        const payload = {
-            id: owner._id.toString(),
-            email: owner.email,
-            userRole: 'owner'
-        };
-
-        const newAccessToken = createToken(payload);
-        const newRefreshToken = createRefreshToken(payload);
-
-        // Update refresh token in database
-        await Owner.findByIdAndUpdate(owner._id, { refreshToken: newRefreshToken });
-
-        // Set new cookies 
-        const accessCookieName = process.env.OWNER_COOKIE_NAME;
-
-        res.cookie(accessCookieName, newAccessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict',
-            maxAge: 1000 * 60 * 15, // 15 minutes
-        });
-
-        res.cookie(refreshCookieName, newRefreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict',
-            maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        });
-
-        return res.status(200).json({ message: 'Token refreshed successfully' });
-
-    } catch (error) {
-        return res.status(500).json({ message: 'Server Error', error: error.message });
-    }
-}
-
 async function logoutOwner(req, res) {
     try {
         const refreshToken = req.cookies[process.env.OWNER_REFRESH_COOKIE_NAME];
@@ -239,4 +181,4 @@ async function logoutOwner(req, res) {
     }
 }
 
-module.exports = { registerOwner, loginOwner, refreshOwnerToken, logoutOwner }
+module.exports = { registerOwner, loginOwner, logoutOwner }
