@@ -40,7 +40,7 @@ const vehicleSchema = new mongoose.Schema({
         type: String,
     },
     NoSeats: {
-        type: String,
+        type: Number,
         required: true
     },
     fuelType: {
