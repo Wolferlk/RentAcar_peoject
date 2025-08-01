@@ -5,7 +5,9 @@ const jwt = require('jsonwebtoken');
 
 
 function verifySuperAdminToken(req, res, next) {
-    const token = req.cookies.superadmintoken ;
+    
+    const tokenName = process.env.SUPERADMIN_COOKIE_NAME;
+    const token = req.cookies[tokenName];
 
     if (!token) {
         return res.status(401).json({ message: 'Access Denied.  Admin Privilages Required !' });
