@@ -3,7 +3,6 @@
 
 function isAnyAdmin(req, res, next) {
     const userRole = req.user.userRole;
-
     try {
 
         if (userRole != 'owner' && userRole != 'super admin') {
@@ -17,7 +16,6 @@ function isAnyAdmin(req, res, next) {
     }
 
 }
-
 
 function isSuperAdmin(req, res, next) {
     const userRole = req.user.userRole;

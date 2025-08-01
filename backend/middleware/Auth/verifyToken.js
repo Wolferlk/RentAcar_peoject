@@ -1,27 +1,9 @@
 const jwt = require('jsonwebtoken');
 
 
-function verifyToken(req, res, next) {
-    const token = req.cookies.token ;
 
-    if (!token) {
-        return res.status(401).json({ message: 'Access Denied. No Token ! User Need to Loging First' });
-    }
 
-    try {
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // add decoded user data from token to request
-        req.user = decoded;
-
-        next();
-
-    } catch (error) {
-   
-        return res.status(403).json({ message: 'Server Error', error:error.message  });
-    }
-
-}
 function verifySuperAdminToken(req, res, next) {
     const token = req.cookies.superadmintoken ;
 
@@ -81,5 +63,5 @@ function verifyOwnerToken(req, res, next) {
 
 }
 
-module.exports = { verifyToken, verifySuperAdminToken, verifyOwnerToken, verifyCustomerToken };
+module.exports = {  verifySuperAdminToken, verifyOwnerToken, verifyCustomerToken };
 

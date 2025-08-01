@@ -49,7 +49,8 @@ app.use("/api/auth/customer", customerAuth);
 const ownerAuth = require("./Routers/Auth/owner/owner-authRouter");
 app.use("/api/auth/owner", ownerAuth);
 
-
+const superadminAuthRouter = require('./Routers/Auth/admin/admin-authRouter');
+app.use("/api/auth/superadmin", superadminAuthRouter);
 
 
 
@@ -59,19 +60,15 @@ app.use("/api/auth/owner", ownerAuth);
 
 
 
-
-
 // Owner Routers
 
-// const ownerContactUs = require("./Routers/Contact/admin/adminContactRouter");
-// app.use("/api/admin/contactus", ownerContactUs);
+
 
 
 
 // Super Admin Routers  ( Company Dashboard )
 
-const superadminAuthRouter = require('./Routers/Auth/admin/admin-authRouter');
-app.use("/api/auth/superadmin", superadminAuthRouter);
+
 
 
 
