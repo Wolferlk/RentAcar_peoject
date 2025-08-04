@@ -1,4 +1,3 @@
-const { verify } = require('jsonwebtoken');
 const Owner = require('../../../Models/ownerModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
 

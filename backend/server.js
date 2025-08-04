@@ -62,7 +62,8 @@ app.use('/api/customer/profile', profile);
 
 
 // Owner Routers
-
+const ownerVehicleRouter = require('./Routers/Owner/ownerVehicleRouter');
+app.use('/api/owner/vehicle', ownerVehicleRouter)
 
 
 
