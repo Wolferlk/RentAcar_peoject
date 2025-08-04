@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { getPendingOwners, approveOwner, rejectOwner } = require('../../../controllers/Admin/admin-ownerController');
-const { verifySuperAdminToken } = require('../../../middleware/Auth/verifyToken');
-const { isSuperAdmin } = require('../../../middleware/Auth/authorization');
-
+const { getPendingOwners, approveOwner, rejectOwner } = require('../../controllers/Admin/admin-ownerController');
+const { verifySuperAdminToken } = require('../../middleware/Auth/verifyToken');
+const { isSuperAdmin } = require('../../middleware/Auth/authorization');
 
 // View all pending owner registration requests
 router.get('/owners/pending', verifySuperAdminToken, isSuperAdmin, getPendingOwners);
@@ -13,6 +12,5 @@ router.patch('/owners/approve/:id', verifySuperAdminToken, isSuperAdmin, approve
 
 // Reject a specific owner by ID
 router.patch('/owners/reject/:id', verifySuperAdminToken, isSuperAdmin, rejectOwner);
-
 
 module.exports = router;
