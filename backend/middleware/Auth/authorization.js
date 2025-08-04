@@ -34,6 +34,12 @@ function isSuperAdmin(req, res, next) {
 
 }
 
+function isSuperAdminUser(user) {
+  return user?.userRole === 'super-admin';
+}
+
+
+
 function isAdmin(req, res, next) {
     const userRole = req.user.userRole;
 
@@ -51,4 +57,4 @@ function isAdmin(req, res, next) {
 
 }
 
-module.exports = {isAnyAdmin,isSuperAdmin,isAdmin}
+module.exports = {isAnyAdmin,isSuperAdmin,isSuperAdminUser,isAdmin}
