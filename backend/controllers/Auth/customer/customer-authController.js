@@ -268,16 +268,28 @@ async function googleLoginUser(req, res) {
             userRole: req.user.userRole
         }
 
-        const token = createToken(payload);
-        const cookieName = process.env.CUSTOMER_COOKIE_NAME;
+        const accessToken = createToken(payload);
+        const refreshToken = createRefreshToken(payload);
 
-        res.status(200)
-            .cookie(cookieName, token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'Strict', 
-                maxAge: 1000 * 60 * 60 * 24 * 5     // 5 days 
-            })
+        // Store refresh token in database
+        await User.findByIdAndUpdate(req.user._id, { refreshToken });
+
+        const accessCookieName = process.env.CUSTOMER_COOKIE_NAME;
+        const refreshCookieName = process.env.CUSTOMER_REFRESH_COOKIE_NAME;
+
+        res.cookie(accessCookieName, accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 15 // 15 minutes
+        });
+
+        res.cookie(refreshCookieName, refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+        });
 
         return res.redirect(process.env.CLIENT_URL);
     
