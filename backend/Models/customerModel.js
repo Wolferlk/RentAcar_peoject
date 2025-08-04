@@ -25,6 +25,26 @@ const customerSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    phoneNumber: {
+        type: String,
+        default: ''
+    },
+    dateOfBirth: {
+        type: Date,
+        default: null
+    },
+    driversLicense: {
+        type: String,
+        default: ''
+    },
+    emergencyContact: {
+        type: String,
+        default: ''
+    },
+    address: {
+        type: String,
+        default: ''
+    },
     photo: {
         type: String,
         default: null

@@ -55,7 +55,8 @@ app.use("/api/auth/superadmin", superadminAuthRouter);
 
 
 // Customer Routers
-
+const profile = require('./Routers/Customer/profileRouter');
+app.use('/api/customer/profile', profile);
 
 
 
