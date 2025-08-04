@@ -39,7 +39,7 @@ const vehicleSchema = new mongoose.Schema({
     description: {
         type: String,
     },
-    NoSeats: {
+    noSeats: {
         type: Number,
         required: true
     },
@@ -61,13 +61,12 @@ const vehicleSchema = new mongoose.Schema({
     pricePerDay: {
         type: Number,
         required: true
-
     },
     pricePerDistance: {
         type: Number,
         required: true
     },
-    Location: {
+    location: {
         type: String,
     },
     phoneNumber: {
@@ -81,7 +80,11 @@ const vehicleSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'owner',
+        required: true
+    }
 })
 
 
