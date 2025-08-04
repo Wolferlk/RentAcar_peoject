@@ -69,7 +69,8 @@ app.use('/api/customer/profile', profile);
 
 // Super Admin Routers  ( Company Dashboard )
 
-
+const adminOwnerRoutes = require('./Routers/Admin/admin-ownerRoute');
+app.use('/api/admin', adminOwnerRoutes);
 
 
 
