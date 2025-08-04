@@ -1,6 +1,8 @@
 const User = require('../../../Models/superAdminModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
 const { createToken,createRefreshToken } = require('../../../utils/jwtUtil');
+const { isSuperAdmin ,isSuperAdminUser } = require('../../../middleware/auth/authorization');
+
 
 // Add Super Admin
 async function addSuperAdmin(req, res) {
@@ -19,8 +21,8 @@ async function addSuperAdmin(req, res) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
-        const existUser = await User.findOne({ email, userRole: 'super-admin' });
-        if (existUser) {
+        const existUser = await User.findOne({ email});//, userRole: 'super-admin' });
+        if (existUser && isSuperAdminUser(existUser)) {
             return res.status(409).json({ message: 'Super Admin with this email already exists' });
         }
 
@@ -67,8 +69,8 @@ async function loginSuperAdmin(req, res) {
     }
 
     try {
-        const existUser = await User.findOne({ email, userRole: 'super-admin' });
-        if (!existUser) {
+        const existUser = await User.findOne({ email});//, userRole: 'super-admin' });
+        if (!existUser || !isSuperAdminUser(existUser) ) {
             return res.status(400).json({ message: "Invalid Email or Not a Super Admin" });
         }
 
