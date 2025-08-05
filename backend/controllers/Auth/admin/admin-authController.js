@@ -4,12 +4,12 @@ const { createToken,createRefreshToken } = require('../../../utils/jwtUtil');
 const { isSuperAdmin ,isSuperAdminUser } = require('../../../middleware/auth/authorization');
 
 
+
 // Add Super Admin
 async function addSuperAdmin(req, res) {
     try {
         const { email, password, firstName, lastName, secretKey } = req.body;
-          console.log('Env SUPER_ADMIN_SECRET:', process.env.SUPER_ADMIN_SECRET);
-        console.log('Received secretKey:', secretKey);
+          
 
         //  Security: require a secret key to create a super admin
 
@@ -46,7 +46,7 @@ async function addSuperAdmin(req, res) {
         const token = createToken(payload);
 
         res.status(201)
-            .cookie('superadmintoken', token, {   // ✅ unified cookie name
+            .cookie(process.env.SUPERADMIN_COOKIE_NAME, token, {   // ✅ unified cookie name
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'Strict',
@@ -89,8 +89,8 @@ async function loginSuperAdmin(req, res) {
         const refreshToken = createRefreshToken(payload);
 
         res
-            .cookie('superadmintoken', accessToken, { httpOnly: true })
-            .cookie('superadminrefreshtoken', refreshToken, { httpOnly: true })
+            .cookie(process.env.SUPERADMIN_COOKIE_NAME, accessToken, { httpOnly: true })
+            .cookie(process.env.SUPERADMIN_REFRESH_COOKIE_NAME, refreshToken, { httpOnly: true })
             .status(200)
             .json({
                 message: "Super Admin Login Successful",
@@ -107,7 +107,7 @@ async function loginSuperAdmin(req, res) {
 
 // Logout Super Admin
 async function logoutSuperAdmin(req, res) {
-    res.clearCookie('superadmintoken', {   // ✅ unified cookie name
+    res.clearCookie(process.env.SUPERADMIN_COOKIE_NAME, {   // ✅ unified cookie name
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict'
