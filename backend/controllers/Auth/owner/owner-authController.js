@@ -1,7 +1,7 @@
 const Owner = require('../../../Models/ownerModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
 
-const { createToken, createRefreshToken, verifyRefreshToken } = require('../../../Utils/jwtUtil');
+const { createToken, createRefreshToken, verifyRefreshToken } = require('../../../utils/jwtUtil');
 
 // Direct Registration For Owner
 async function registerOwner(req, res) {

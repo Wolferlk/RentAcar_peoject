@@ -44,7 +44,7 @@ async function registerVehicle(req, res) {
         });
 
         return res.status(201).json({
-            message: 'Vehicle Created Successfully!'
+            message: 'Vehicle Created Successfully! Pending Approval.'
         })
 
     } catch(error) {
@@ -134,6 +134,12 @@ async function updateVehicle(req, res) {
             });
         }
 
+        if (!vehicle.isApproved) {
+            return res.status(403).json({
+                message: 'Your vehicle registration is still pending for approval.'
+            })
+        }
+
         const {vehicleName, brand, model, year, vehicleType, description, noSeats, fuelType, transmission, mileage, isDriverAvailable, pricePerDay, pricePerDistance, location, phoneNumber, email, pickupAddress} = req.body;
 
         await Vehicle.updateOne( 
@@ -174,6 +180,12 @@ async function deleteVehicle(req, res) {
             });
         }
 
+        if (!vehicle.isApproved) {
+            return res.status(403).json({
+                message: 'Your vehicle registration is still pending for approval.'
+            })
+        }
+        
         await Vehicle.findByIdAndDelete(vehicleId)
 
         return res.status(200).json({
