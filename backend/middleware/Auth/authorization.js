@@ -5,7 +5,7 @@ function isAnyAdmin(req, res, next) {
     const userRole = req.user.userRole;
     try {
 
-        if (userRole != 'owner' && userRole != 'super admin') {
+        if (userRole != 'owner' && userRole != 'super-admin') {
             return res.status(403).json({ message: 'Access denied. Admin or Owner privileges required.' });
         }
 
@@ -18,8 +18,11 @@ function isAnyAdmin(req, res, next) {
 }
 
 function isSuperAdmin(req, res, next) {
-    const userRole = req.user.userRole;
 
+   
+
+    const userRole = req.user?.userRole;
+ 
     try {
 
         if (userRole != 'super-admin') {
