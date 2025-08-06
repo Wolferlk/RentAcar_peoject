@@ -12,6 +12,7 @@ const getPendingOwners = async (req, res) => {
 };
 
 // APPROVE an owner
+
 const approveOwner = async (req, res) => {
     const ownerId = req.params.id;
     try {
@@ -28,18 +29,33 @@ const approveOwner = async (req, res) => {
         res.status(500).json({ message: 'Error approving owner', error: error.message });
     }
 };
-// REJECT or DELETE an owner
+// REJECT  owner
 const rejectOwner = async (req, res) => {
     const ownerId = req.params.id;
     try {
-        const owner = await Owner.findByIdAndDelete(ownerId);
+                const owner = await Owner.findByIdAndDelete(ownerId);
+
         if (!owner) return res.status(404).json({ message: 'Owner not found or already deleted' });
 
-        res.status(200).json({ message: 'Owner rejected and deleted successfully' });
+         res.status(200).json({ message: 'Owner rejected and deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error rejecting owner', error: error.message });
     }
 };
 
+// Get all approved owners
+const getApprovedOwners = async (req, res) => {
+    try {
+        const owner = await Owner.find({ isApproved: true }).select('-password');
+        res.status(200).json(owner);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
 
-module.exports = {getPendingOwners,approveOwner,rejectOwner};
+
+
+
+
+
+module.exports = {getPendingOwners,approveOwner,rejectOwner,getApprovedOwners};
