@@ -58,11 +58,16 @@ app.use("/api/auth/superadmin", superadminAuthRouter);
 const profile = require('./Routers/Customer/profileRouter');
 app.use('/api/customer/profile', profile);
 
+const customerBookingRouter = require('./Routers/Customer/bookingRouter');
+app.use('/api/customer/booking', customerBookingRouter);
 
+const favoriteRouter = require('./Routers/Customer/favoriteRouter');
+app.use('/api/customer/favorite', favoriteRouter);
 
 
 // Owner Routers
-
+const ownerVehicleRouter = require('./Routers/Owner/ownerVehicleRouter');
+app.use('/api/owner/vehicle', ownerVehicleRouter)
 
 
 

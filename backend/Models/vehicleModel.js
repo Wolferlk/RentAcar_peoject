@@ -10,6 +10,10 @@ const vehicleSchema = new mongoose.Schema({
         // false : Already rented  (taken by a customer)
         // if vehicle finished its rented perioud or check available vehicles, only this field will be use or update
     },
+    isApproved: {
+        type: Boolean,
+        default: false
+    },
     vehicleName: {
         type: String,
         required: true
