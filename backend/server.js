@@ -61,7 +61,8 @@ app.use('/api/customer/profile', profile);
 const customerBookingRouter = require('./Routers/Customer/bookingRouter');
 app.use('/api/customer/booking', customerBookingRouter);
 
-
+const favoriteRouter = require('./Routers/Customer/favoriteRouter');
+app.use('/api/customer/favorite', favoriteRouter);
 
 
 // Owner Routers
