@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { verifySuperAdminToken } = require('../../middleware/Auth/verifyToken');
 const { isSuperAdmin } = require('../../middleware/Auth/authorization');
-const { getPendingVehicles, approveVehicle, rejectVehicle, getApprovedVehicles } = require('../../controllers/Admin/admin-VehicleController');
+const { getPendingVehicles, approveVehicle, rejectVehicle, getApprovedVehicles,countApprovedVehicles } = require('../../controllers/Admin/admin-VehicleController');
 
 // Get all pending vehicles
 router.get('/vehicles/pending', verifySuperAdminToken, isSuperAdmin, getPendingVehicles);
@@ -15,5 +15,8 @@ router.delete('/vehicles/reject/:id', verifySuperAdminToken, isSuperAdmin, rejec
 
 // Get all approved vehicles
 router.get('/vehicles/approved', verifySuperAdminToken, isSuperAdmin, getApprovedVehicles);
+
+// Count only approved vehicles
+router.get('/vehicles/count/approved', verifySuperAdminToken, isSuperAdmin, countApprovedVehicles);
 
 module.exports = router;
