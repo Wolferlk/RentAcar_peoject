@@ -47,4 +47,15 @@ const getApprovedVehicles = async (req, res) => {
     }
 };
 
-module.exports = { getPendingVehicles, approveVehicle, rejectVehicle, getApprovedVehicles };
+// Count only approved vehicles
+const countApprovedVehicles = async (req, res) => {
+    try {
+        const total = await Vehicle.countDocuments({ isApproved: true });
+        res.status(200).json({ total });
+    } catch (error) {
+        res.status(500).json({ message: 'Error counting approved vehicles', error: error.message });
+    }
+};
+
+
+module.exports = { getPendingVehicles, approveVehicle, rejectVehicle, getApprovedVehicles,countApprovedVehicles };
