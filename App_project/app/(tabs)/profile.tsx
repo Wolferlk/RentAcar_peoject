@@ -53,7 +53,11 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: () => console.log('Logged out') },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: () => console.log('Logged out'),
+      },
     ]);
   };
 
@@ -64,7 +68,10 @@ export default function ProfileScreen() {
         <View style={styles.profileSection}>
           <View style={styles.avatarWrapper}>
             <Image source={{ uri: user.avatar }} style={styles.profileImage} />
-            <TouchableOpacity style={styles.editIcon} onPress={handleEditProfile}>
+            <TouchableOpacity
+              style={styles.editIcon}
+              onPress={handleEditProfile}
+            >
               <Pencil size={18} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -89,6 +96,14 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Rental Documents Link */}
+        <TouchableOpacity
+          style={styles.documentsButton}
+          onPress={() => router.push('/documents/rental-documents')}
+        >
+          <Text style={styles.documentsText}>📄 Upload Rental Documents</Text>
+        </TouchableOpacity>
+
         {/* Rental History */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🕓 Recent Rentals</Text>
@@ -97,7 +112,9 @@ export default function ProfileScreen() {
             <View key={index} style={styles.rentalCard}>
               <View>
                 <Text style={styles.carName}>{rental.car}</Text>
-                <Text style={styles.rentalDetails}>{rental.date} • {rental.duration}</Text>
+                <Text style={styles.rentalDetails}>
+                  {rental.date} • {rental.duration}
+                </Text>
               </View>
               <View style={styles.statusBadge}>
                 <Text style={styles.statusText}>{rental.status}</Text>
@@ -192,6 +209,20 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 15,
     color: '#333',
+  },
+  documentsButton: {
+    backgroundColor: '#007AFF',
+    alignSelf: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 30,
+    marginBottom: 20,
+    elevation: 2,
+  },
+  documentsText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
   },
   rentalCard: {
     backgroundColor: '#f2f8ff',
