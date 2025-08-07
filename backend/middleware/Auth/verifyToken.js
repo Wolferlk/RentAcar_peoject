@@ -2,27 +2,79 @@ const jwt = require('jsonwebtoken');
 const { verifyRefreshToken, createToken } = require('../../Utils/jwtUtil');
 const Owner = require('../../Models/ownerModel');
 const Customer = require('../../Models/customerModel');
+const SuperAdmin = require('../../Models/superAdminModel');
 
-function verifySuperAdminToken(req, res, next) {
+async function verifySuperAdminToken(req, res, next) {
 
-    const tokenName = process.env.SUPERADMIN_COOKIE_NAME;
-    const token = req.cookies[tokenName];
-
-    if (!token) {
-        return res.status(401).json({ message: 'Access Denied.  Admin Privilages Required !' });
+    const accessToken = req.cookies[process.env.SUPERADMIN_COOKIE_NAME];
+    const refreshToken = req.cookies[process.env.SUPERADMIN_REFRESH_COOKIE_NAME];
+    if (accessToken) {       
+        try {
+            const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+            req.user = decoded;
+            return next();
+        } catch (error) {
+            console.log("Super Admin's access token expired. Checking refresh token.");
+        }
+    }
+    if (!refreshToken) {
+        return res.status(401).json({
+            message: 'Access Denied. Please log in.'
+        });
     }
 
+
     try {
+        // Verify refresh token
+        const decoded = verifyRefreshToken(refreshToken);
+        if (!decoded || decoded.type !== 'refresh') {
+            return res.status(401).json({
+                message: 'Invalid refresh token. Please log in again.'
+            });
+        }
+        // Check super admin exists and refresh token matches with one in the db
+        const superAdmin = await SuperAdmin.findById(decoded.id);
+        if (!superAdmin || superAdmin.refreshToken !== refreshToken) {
+            return res.status(401).json({
+                message: 'Invalid refresh token. Please log in again.'
+            });
+        }
+        // Generating a new access token
+        const payload = {
+            id: superAdmin._id.toString(),
+            email: superAdmin.email,
+            userRole: superAdmin.userRole
+        };
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // add decoded user data from token to request
-        req.user = decoded;
+        const newAccessToken = createToken(payload);
+        if (!newAccessToken) {
+            return res.status(500).json({
+                message: 'Token refreshing failed.'
+            });
+        }
 
+        res.cookie(process.env.SUPERADMIN_COOKIE_NAME, newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict',
+            maxAge: 1000 * 60 * 15, // 15 minutes
+        });
+
+        req.user = {
+            id: superAdmin._id.toString(),
+            email: superAdmin.email,
+            userRole: superAdmin.userRole
+        };
+
+        console.log("Super Admin access token successfully refreshed.");
         next();
+
 
     } catch (error) {
    
-        return res.status(403).json({ message: 'Server Error', error:error.message  });
+       return res.status(401).json({
+            message: 'Token refreshing error. Please log in again.'
+        });
     }
 
 }
