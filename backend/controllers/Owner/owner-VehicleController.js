@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const Vehicle = require("../../Models/vehicleModel");
 
 async function registerVehicle(req, res) {
@@ -198,6 +200,21 @@ async function deleteVehicle(req, res) {
             })
         }
         
+        // Delete related images from the server
+        if (vehicle.images && vehicle.images.length > 0) {
+            vehicle.images.forEach(imagePath => {
+                // convert relative path to absolute path
+                // Remove leading slash from the path if it exists
+                const relativePath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+                const absolutePath = path.join(__dirname, '../../', relativePath);
+                            
+                fs.unlink(absolutePath, (err) => {
+                    if (err) {
+                        console.error(`Failed to delete image: ${absolutePath}`, err);
+                    }
+                });
+            });
+        }
         await Vehicle.findByIdAndDelete(vehicleId)
 
         return res.status(200).json({
