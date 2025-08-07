@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 async function sendEmail(to, subject, clientName, clientSubject, clientMassage, websiteLink) {
     try {
         const mailDetails = {
-            from: process.env.EMAIL,
+            from: process.env.APP_EMAIL,
             to: to,
             subject: subject,
             html: setConfirmEmailBody(clientName, clientSubject, clientMassage, websiteLink),
