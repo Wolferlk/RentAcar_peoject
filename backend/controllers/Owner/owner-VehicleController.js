@@ -20,6 +20,8 @@ async function registerVehicle(req, res) {
 
         // Onwer id
         const ownerId = req?.user.id;
+        files = req.files || []
+        const imagePaths = files.map(file => `/uploads/vehicles/${file.filename}`);
 
         await Vehicle.create({
             vehicleName, 
@@ -40,6 +42,7 @@ async function registerVehicle(req, res) {
             phoneNumber, 
             email, 
             pickupAddress,
+            images: imagePaths,
             owner: ownerId //owner reference
         });
 
@@ -142,10 +145,19 @@ async function updateVehicle(req, res) {
 
         const {vehicleName, brand, model, year, vehicleType, description, noSeats, fuelType, transmission, mileage, isDriverAvailable, pricePerDay, pricePerDistance, location, phoneNumber, email, pickupAddress} = req.body;
 
+        const files = req.files || [];
+        const newImagePaths = files.map(file => `/uploads/vehicles/${file.filename}`);
+
+        let updatedImages = vehicle.images || [];
+        if (newImagePaths.length > 0) {
+            updatedImages = [...updatedImages, ...newImagePaths];
+        }
+
         await Vehicle.updateOne( 
             {_id: vehicleId}, 
             {$set: {
-                vehicleName, brand, model, year, vehicleType, description, noSeats, fuelType, transmission, mileage, isDriverAvailable, pricePerDay, pricePerDistance, location, phoneNumber, email, pickupAddress
+                vehicleName, brand, model, year, vehicleType, description, noSeats, fuelType, transmission, mileage, isDriverAvailable, pricePerDay, pricePerDistance, location, phoneNumber, email, pickupAddress,
+                images: updatedImages
             }}
         );
         return res.status(200).json({

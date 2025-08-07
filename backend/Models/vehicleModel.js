@@ -40,6 +40,10 @@ const vehicleSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    images: {
+        type: [String],
+        default: [] // defualt empty array, to be added as many images. Saved as relative paths.
+    },
     description: {
         type: String,
     },

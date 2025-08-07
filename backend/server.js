@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -31,6 +32,9 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(passport.initialize());
+
+// Serve static files for uploads route
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //Database Connection
 // uncomment this after defining the mongo uri in .env file
