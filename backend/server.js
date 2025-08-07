@@ -64,6 +64,8 @@ app.use('/api/customer/booking', customerBookingRouter);
 const favoriteRouter = require('./Routers/Customer/favoriteRouter');
 app.use('/api/customer/favorite', favoriteRouter);
 
+const reviewRouter = require('./Routers/Customer/reviewRouter');
+app.use('/api/customer/review', reviewRouter);
 
 // Owner Routers
 const ownerVehicleRouter = require('./Routers/Owner/ownerVehicleRouter');
