@@ -79,6 +79,11 @@ app.use('/api/owner/vehicle', ownerVehicleRouter)
 const adminOwnerRoutes = require('./Routers/Admin/admin-ownerRouter');
 app.use('/api/superadmin', adminOwnerRoutes);
 
+//For Admin Vehicle Aprove
+const adminVehicleRouter = require('./Routers/Admin/admin-vehicleRouter');
+app.use('/api/superadmin', adminVehicleRouter);
+
+
 
 
 
