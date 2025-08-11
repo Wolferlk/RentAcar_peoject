@@ -74,6 +74,9 @@ app.use('/api/customer/review', reviewRouter);
 const contactRouter = require('./Routers/Customer/contactRouter');
 app.use('/api/customer/contact', contactRouter);
 
+const rentalHistoryRouter = require('./Routers/Customer/rentalHistoryRouter');
+app.use('/api/customer/rental-history', rentalHistoryRouter);
+
 // Owner Routers
 const ownerVehicleRouter = require('./Routers/Owner/ownerVehicleRouter');
 app.use('/api/owner/vehicle', ownerVehicleRouter)
