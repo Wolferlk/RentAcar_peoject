@@ -16,6 +16,9 @@ const customerSchema = new mongoose.Schema({
     },
     password: {
         type: String,
+        required: function() {
+            return !this.googleId;
+        }
     },
     firstName: {
         type: String,
@@ -62,16 +65,18 @@ const customerSchema = new mongoose.Schema({
     },
     userRole: {
         type: String,
-        enum: [
-            'customer',
-            'owner',
-            'super admin',
-        ],
-
         default: 'customer'
     },
     refreshToken: {
         type: String,
+        default: null
+    },
+    resetPasswordToken: {
+        type: String,
+        default: null
+    },
+    resetPasswordExpires: {
+        type: Date,
         default: null
     },
     createdAt: { type: Date, default: Date.now }

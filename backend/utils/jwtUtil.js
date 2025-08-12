@@ -73,4 +73,31 @@ function verifyToken(req, res, next) {
 
 }
 
-module.exports = { createToken, createRefreshToken, verifyRefreshToken, verifyToken };
+// Create password reset token
+function createResetToken(userId) {
+    const expTime = Math.floor(Date.now() / 1000) + (60 * 60); // 1 hour
+
+    try {
+        const resetToken = jwt.sign({
+            id: userId,
+            type: 'password_reset',
+            exp: expTime,
+        }, process.env.RESET_TOKEN_SECRET);
+        return resetToken;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
+
+function verifyResetToken(token) {
+    try {
+        const decoded = jwt.verify(token, process.env.RESET_TOKEN_SECRET);
+        return decoded;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
+
+module.exports = { createToken, createRefreshToken, verifyRefreshToken, verifyToken, createResetToken, verifyResetToken };

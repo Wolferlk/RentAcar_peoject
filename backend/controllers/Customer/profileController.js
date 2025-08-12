@@ -1,6 +1,7 @@
+const { model, get } = require('mongoose');
 const Customer = require('../../Models/customerModel');
 
-exports.getProfile = async (req, res) => {
+async function getProfile(req, res) {
     try {
         const custoemer = await Customer.findById(req.user.id);
         if (!custoemer) {
@@ -19,7 +20,7 @@ exports.getProfile = async (req, res) => {
     }
 }
 
-exports.updateProfile = async (req, res) => {
+async function updateProfile(req, res) {
     try {
         const { firstName, lastName, email, photo, image, phoneNumber, dateOfBirth, driversLicense, emergencyContact, address } = req.body;
 
@@ -59,7 +60,7 @@ exports.updateProfile = async (req, res) => {
     }
 }
 
-exports.deleteProfile = async (req, res) => {
+async function deleteProfile(req, res) {
     try {
 
         await Customer.findByIdAndUpdate(req.user.id, { refreshToken: null });
@@ -94,3 +95,5 @@ exports.deleteProfile = async (req, res) => {
         });
     }
 }
+
+module.exports = { getProfile, updateProfile, deleteProfile };

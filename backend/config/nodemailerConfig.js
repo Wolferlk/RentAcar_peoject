@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const setConfirmEmailBody = require('./confirmEmailbody');
+const setPasswordResetEmailBody = require('./resetPassEmailBody');
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
@@ -32,4 +33,22 @@ async function sendEmail(to, subject, clientName, clientSubject, clientMassage, 
     }
 }
 
-module.exports = sendEmail;
+async function sendPasswordResetEmail(to, customerName, resetLink, websiteLink) {
+    try {
+        const mailDetails = {
+            from: process.env.APP_EMAIL,
+            to: to,
+            subject: "Password Reset Request",
+            html: setPasswordResetEmailBody(customerName, resetLink, websiteLink),
+        };
+
+        await transporter.sendMail(mailDetails);
+
+        return true;
+
+    } catch (error) {
+        console.log("Failed to send email:", error);
+    }
+}
+
+module.exports = { sendEmail, sendPasswordResetEmail };

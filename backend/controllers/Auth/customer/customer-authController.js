@@ -1,7 +1,7 @@
 const User = require('../../../Models/customerModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
-const { createToken, createRefreshToken, verifyRefreshToken } = require('../../../Utils/jwtUtil');
-
+const { createToken, createRefreshToken, verifyRefreshToken, createResetToken, verifyResetToken } = require('../../../Utils/jwtUtil');
+const { sendPasswordResetEmail } = require('../../../config/nodemailerConfig');
 
 //Note: this is for to understand and make neccessory changes in this
 
@@ -305,6 +305,132 @@ async function googleLoginUser(req, res) {
 
 }
 
+async function requestPasswordReset(req, res) {
+    try {
+        const { email } = req.body;
 
+        if(!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
 
-module.exports = { addUser, loginUser, refreshCustomerToken, logoutUser, findOrCreateGoogleUser, googleLoginUser }
+        const user = await User.findOne({ email });
+        if (!user) {
+            // Don't reveal if email exists or not for security
+            return res.status(200).json({
+                success: true,
+                message: 'If an account with that email exists, a password reset link has been sent.'
+            });
+        }
+
+        // Check if user has a password (not Google user)
+        if (!user.password) {
+            return res.status(400).json({
+                success: false,
+                message: 'This account uses Google login. Please sign in with Google.'
+            });
+        }
+
+        // Generate a password reset token
+        const resetToken = createResetToken(user._id.toString());
+        if (!resetToken) {
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to generate reset token'
+            });
+        }
+
+        const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        
+        // Save reset token to database
+        await User.findByIdAndUpdate(user._id, {
+            resetPasswordToken: resetToken,
+            resetPasswordExpires: resetExpires
+        });
+
+        const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
+
+        const emailSent = await sendPasswordResetEmail(
+            user.email,
+            user.firstName,
+            resetLink,
+            process.env.WEBSITE_LINK
+        );
+        
+        if (!emailSent) {
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to send reset email. Please try again.'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Password reset link has been sent to your email.'
+        });
+    } catch (error) {
+        console.error('Password reset request error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server error. Please try again.',
+            error: error.message
+        });
+    }
+}
+
+async function resetPassword(req, res) {
+    try {
+        const { token, newPassword, confirmPassword } = req.body;
+
+        if (!token || !newPassword || !confirmPassword) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ message: "Passwords do not match" });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({message: 'Password must be at least 6 characters long'});
+        }
+
+        // Verify the reset token
+        const decoded = verifyResetToken(token);
+        if (!decoded || decoded.type !== 'password_reset') {
+            return res.status(400).json({ message: "Invalid or expired token" });
+        }
+
+        // Find the user by ID and update the password
+        const user = await User.findById({
+            _id: decoded.id,
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: new Date() }
+        });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const hashedPassword = await hashPassword(newPassword);
+
+        await User.findByIdAndUpdate(user._id, {
+            password: hashedPassword,
+            resetPasswordToken: null,
+            resetPasswordExpires: null,
+            refreshToken: null
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Password has been reset successfully. Please log in with your new password.'
+        });
+
+    } catch (error) {
+        console.error('Password reset error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server error. Please try again.',
+            error: error.message
+        });
+    }
+}
+
+module.exports = { addUser, loginUser, refreshCustomerToken, logoutUser, findOrCreateGoogleUser, googleLoginUser, requestPasswordReset, resetPassword }
