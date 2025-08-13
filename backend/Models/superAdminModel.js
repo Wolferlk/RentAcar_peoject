@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
-const userSchema = new mongoose.Schema({
+const superAdminSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -33,4 +34,11 @@ const userSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema);
+
+
+// Add this method to your schema
+superAdminSchema.methods.comparePassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
+
+module.exports = mongoose.model('SuperAdmin', superAdminSchema);
