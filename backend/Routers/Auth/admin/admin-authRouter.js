@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { addSuperAdmin, loginSuperAdmin, logoutSuperAdmin } = require('../../../controllers/Auth/admin/admin-authController');
+const { addSuperAdmin, loginSuperAdmin, logoutSuperAdmin,requestPasswordReset, resetPassword } = require('../../../controllers/Auth/admin/admin-authController');
 const {verifySuperAdminToken} = require('../../../middleware/Auth/verifyToken');
 const {isSuperAdmin}  = require('../../../middleware/Auth/authorization');
 const { verifyRefreshToken, createAccessToken } = require('../../../utils/jwtUtil');
@@ -10,6 +10,12 @@ router.post('/add', addSuperAdmin);
 
 // Super Admin login
 router.post('/login', loginSuperAdmin);
+
+// Route for requesting password reset
+router.post('/forgot-password', requestPasswordReset);
+
+// Route for resetting password
+router.put('/reset-password/:token', resetPassword);
 
 
 router.post('/refresh', async (req, res) => {

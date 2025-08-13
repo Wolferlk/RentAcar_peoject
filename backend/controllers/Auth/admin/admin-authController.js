@@ -1,4 +1,6 @@
 const User = require('../../../Models/superAdminModel');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
 const { createToken,createRefreshToken } = require('../../../utils/jwtUtil');
 const { isSuperAdmin ,isSuperAdminUser } = require('../../../middleware/auth/authorization');
@@ -115,4 +117,72 @@ async function logoutSuperAdmin(req, res) {
     return res.status(200).json({ message: 'Super Admin logout successful' });
 }
 
-module.exports = { addSuperAdmin, loginSuperAdmin, logoutSuperAdmin };
+//forgotten password
+
+const requestPasswordReset = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const admin = await User.findOne({ email });
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        admin.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        admin.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // Token valid for 10 minutes
+        await admin.save();
+
+        // Send email
+        const resetUrl = `http://localhost:5000/api/superadmin/reset-password/${resetToken}`;
+        const message = `You requested a password reset. Click the link to reset your password: ${resetUrl}`;
+
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: process.env.APP_EMAIL,
+                pass: process.env.APP_PASSWORD
+            },
+        });
+
+        await transporter.sendMail({
+            to: admin.email,
+            subject: 'Password Reset Request',
+            text: message,
+        });
+
+        res.status(200).json({ message: 'Password reset email sent' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error requesting password reset', error: error.message });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { newPassword } = req.body;
+
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+        const admin = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: Date.now() }, // Check if token is still valid
+        });
+
+        if (!admin) {
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        // Reset password
+        admin.password = await hashPassword(newPassword);
+        admin.resetPasswordToken = undefined;
+        admin.resetPasswordExpires = undefined;
+        await admin.save();
+
+        res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error resetting password', error: error.message });
+    }
+};
+
+module.exports = { addSuperAdmin, loginSuperAdmin, logoutSuperAdmin, requestPasswordReset, resetPassword };
