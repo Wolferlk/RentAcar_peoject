@@ -4,10 +4,14 @@ const fs = require('fs');
 
 // Create upload directory if it doesn't exist
 const vehicleImagesPath = path.join(__dirname, '../uploads/vehicles');
+const customerProfileImagesPath = path.join(__dirname, '../uploads/customerProfiles');
 
 // Ensure directories exist
 if (!fs.existsSync(vehicleImagesPath)) {
   fs.mkdirSync(vehicleImagesPath, { recursive: true });
+}
+if (!fs.existsSync(customerProfileImagesPath)) {
+  fs.mkdirSync(customerProfileImagesPath, { recursive: true });
 }
 
 // For now configured only for vehicleImages, anyone can make necessary changes for their images accordingly
@@ -15,6 +19,8 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     if (file.fieldname === 'vehicleImages') {
       cb(null, vehicleImagesPath);
+    } else if (file.fieldname === 'customerProfileImage') {
+      cb(null, customerProfileImagesPath);
     } else {
       cb(new Error('Invalid file field'), false);
     }

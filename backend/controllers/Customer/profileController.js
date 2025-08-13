@@ -1,5 +1,7 @@
 const { model, get } = require('mongoose');
 const Customer = require('../../Models/customerModel');
+const fs = require('fs');
+const path = require('path');
 
 async function getProfile(req, res) {
     try {
@@ -22,26 +24,29 @@ async function getProfile(req, res) {
 
 async function updateProfile(req, res) {
     try {
-        const { firstName, lastName, email, photo, image, phoneNumber, dateOfBirth, driversLicense, emergencyContact, address } = req.body;
+        const { firstName, lastName, email, phoneNumber, dateOfBirth, driversLicense, emergencyContact, address } = req.body;
+
+        let photoPath = null;
+        if (req.file) {
+            photoPath = `/uploads/customerProfiles/${req.file.filename}`;
+        }
+
+        const updateData = {};
+        if (firstName !== undefined) updateData.firstName = firstName;
+        if (lastName !== undefined) updateData.lastName = lastName;
+        if (email !== undefined) updateData.email = email;
+        if (photoPath !== null) updateData.photo = photoPath;
+        if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+        if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
+        if (driversLicense !== undefined) updateData.driversLicense = driversLicense;
+        if (emergencyContact !== undefined) updateData.emergencyContact = emergencyContact;
+        if (address !== undefined) updateData.address = address;
 
         const updatedCustomer = await Customer.findByIdAndUpdate(
             req.user.id,
-            { 
-                $set: {
-                    firstName,
-                    lastName,
-                    email,
-                    photo,
-                    image,
-                    phoneNumber,
-                    dateOfBirth,
-                    driversLicense,
-                    emergencyContact,
-                    address
-                }
-            },
+            { $set: updateData },
             { new: true, runValidators: true }
-        );
+        ).select('-password -refreshToken -resetPasswordToken');
 
         if (!updatedCustomer) {
             return res.status(404).json({ message: 'Customer not found' });
@@ -49,8 +54,117 @@ async function updateProfile(req, res) {
 
         res.status(200).json({
             success: true,
+            message: 'Profile updated successfully',
             data: updatedCustomer
         });
+    } catch (error) {
+
+        if(req.file) {
+            const filePath = path.join(__dirname, '../../uploads/customerProfiles', req.file.filename);
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                }
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+}
+
+async function updateProfilePhoto(req, res) {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const currentCustomer = await Customer.findById(req.user.id);
+        if (!currentCustomer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Customer not found'
+            });
+        }
+
+        if (currentCustomer.photo) {
+            const oldPhotoPath = path.join(__dirname, '../../', currentCustomer.photo);
+            fs.unlink(oldPhotoPath, (err) => {
+                if (err) console.error('Failed to delete old photo:', err);
+            });
+        }
+
+        // Update with new photo
+        const photoPath = `/uploads/customerProfiles/${req.file.filename}`;
+        const updatedCustomer = await Customer.findByIdAndUpdate(
+            req.user.id,
+            { $set: { photo: photoPath } },
+            { new: true }
+        ).select('-password -refreshToken -resetPasswordToken');
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile photo updated successfully',
+            data: {
+                photo: updatedCustomer.photo,
+                customer: updatedCustomer
+            }
+        });
+    } catch (error) {
+        if (req.file) {
+            const filePath = path.join(__dirname, '../../uploads/customerProfiles/', req.file.filename);
+            fs.unlink(filePath, (err) => {
+                if (err) console.error('Failed to delete uploaded file:', err);
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+}
+
+async function deleteProfilePhoto(req, res) {
+    try {
+        const customer = await Customer.findById(req.user.id);
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Customer not found'
+            });
+        }
+
+        if (!customer.photo) {
+            return res.status(400).json({
+                success: false,
+                message: 'No profile photo to delete'
+            });
+        }
+
+        // Delete photo file
+        const photoPath = path.join(__dirname, '../../', customer.photo);
+        fs.unlink(photoPath, (err) => {
+            if (err) console.error('Failed to delete photo file:', err);
+        });
+
+        // Update database
+        const updatedCustomer = await Customer.findByIdAndUpdate(
+            req.user.id,
+            { $unset: { photo: 1 } },
+            { new: true }
+        ).select('-password -refreshToken -resetPasswordToken');
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile photo deleted successfully',
+            data: updatedCustomer
+        });
+
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -63,21 +177,33 @@ async function updateProfile(req, res) {
 async function deleteProfile(req, res) {
     try {
 
+        const customer = await Customer.findById(req.user.id);
+        if (!customer) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Customer not found' 
+            });
+        }
+
+        // Delete profile photo if exists
+        if (customer.photo) {
+            const photoPath = path.join(__dirname, '../../', customer.photo);
+            fs.unlink(photoPath, (err) => {
+                if (err) console.error('Failed to delete photo:', err);
+            });
+        }
+
+        // Clear refresh token
         await Customer.findByIdAndUpdate(req.user.id, { refreshToken: null });
 
         const deletedCustomer = await Customer.findByIdAndDelete(req.user.id);
-        if (!deletedCustomer) {
-            return res.status(404).json({ message: 'Customer not found' });
-        }
 
-        // Clear the correct cookies with proper options
-        const cookieOptions = {
+         const cookieOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'Strict'
         };
 
-        // Clear both access and refresh tokens
         res.clearCookie(process.env.CUSTOMER_COOKIE_NAME, cookieOptions);
         res.clearCookie(process.env.CUSTOMER_REFRESH_COOKIE_NAME, cookieOptions);
 
@@ -96,4 +222,4 @@ async function deleteProfile(req, res) {
     }
 }
 
-module.exports = { getProfile, updateProfile, deleteProfile };
+module.exports = { getProfile, updateProfile, deleteProfile, updateProfilePhoto, deleteProfilePhoto };
