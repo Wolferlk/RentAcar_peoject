@@ -1,4 +1,5 @@
 const Vehicle = require('../../Models/vehicleModel');
+const { normalizePlate, deNormalizePlate } = require('../../utils/licensePlateUtil');
 
 // Get all pending vehicles
 const getPendingVehicles = async (req, res) => {
@@ -57,5 +58,30 @@ const countApprovedVehicles = async (req, res) => {
     }
 };
 
+// Search/filter vehicles
+const searchVehicles = async (req, res) => {
+    try {
+        const { licensePlate, ownerId, isApproved } = req.query;
+        let filter = {};
 
-module.exports = { getPendingVehicles, approveVehicle, rejectVehicle, getApprovedVehicles,countApprovedVehicles };
+        if (licensePlate) {
+            // Normalize input for search
+            const { normalizePlate } = require('../../utils/licensePlateUtil');
+            filter.vehicleLicenseNumber = normalizePlate(licensePlate);
+        }
+        if (ownerId) {
+            filter.owner = ownerId;
+        }
+        if (isApproved !== undefined) {
+            filter.isApproved = isApproved === 'true';
+        }
+
+        const vehicles = await Vehicle.find(filter);
+        res.status(200).json(vehicles);
+    } catch (error) {
+        res.status(500).json({ message: 'Error searching vehicles', error: error.message });
+    }
+};
+
+
+module.exports = { getPendingVehicles, approveVehicle, rejectVehicle, getApprovedVehicles,countApprovedVehicles, searchVehicles };
