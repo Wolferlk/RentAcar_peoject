@@ -219,7 +219,7 @@ async function verifyOwnerToken(req, res, next) {
             userRole: 'owner'
         }
 
-        console.log("Access token successfully refreshed.")
+        console.log("Owner Access token successfully refreshed.")
         next();
     } catch (error) {
         return res.status(401).json({

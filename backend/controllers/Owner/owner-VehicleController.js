@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const Vehicle = require("../../Models/vehicleModel");
+const { error } = require('console');
 
 async function registerVehicle(req, res) {
     try {
@@ -193,12 +194,6 @@ async function deleteVehicle(req, res) {
                 message: 'You don\'t have permission to delete others\' vehicles.'
             });
         }
-
-        if (!vehicle.isApproved) {
-            return res.status(403).json({
-                message: 'Your vehicle registration is still pending for approval.'
-            })
-        }
         
         // Delete related images from the server
         if (vehicle.images && vehicle.images.length > 0) {
@@ -229,6 +224,71 @@ async function deleteVehicle(req, res) {
     }
 }
 
+// To delete a specifc vehicle image
+async function deleteVehicleImage(req, res) {
+    try{
+        const vehicleId = req.params.id;
+        const imageId = parseInt(req.params.imageId);
+        const ownerId = req.user.id;
+
+        const vehicle = await Vehicle.findById(vehicleId);
+        if (!vehicle) {
+            return res.status(404).json({
+                message: 'No vehicle found.'
+            });
+        }
+
+        if (vehicle.owner.toString() !== ownerId){
+            return res.status(403).json({
+                message: 'You don\'t have permission to delete images from others\' vehicles.'
+            });
+        }
+
+        // Check if imageId is valid
+        if (imageId >= vehicle.images.length || imageId < 0) {
+            return res.status(404).json({
+                message: 'Invalid image index.'
+            })
+        }
+
+        const imageToDelete = vehicle.images[imageId];
+
+        // Delete the image from file system
+        if (imageToDelete) {
+            const relativePath = imageToDelete.startsWith('/') ? imageToDelete.substring(1) : imageToDelete;
+            const absolutePath = path.join(__dirname, '../../', relativePath);
+
+            fs.unlink(absolutePath, (err) => {
+                if(err) {
+                    console.error(`Failed to delete image: ${absolutePath}`, err);
+                }
+            });
+        }
+
+        // Remove the image from the images array
+        const updatedImages = [...vehicle.images];
+        updatedImages.splice(imageId, 1);
+
+        await Vehicle.updateOne(
+            {_id: vehicleId},
+            {$set: {
+                images: updatedImages
+            }}
+        );
+
+        return res.status(200).json({
+            message: 'Image deleted successfully',
+            remainingImages: updatedImages
+        });
+    } catch(err) {
+        console.error('Error deleting vehicle image:', err);
+        return res.status(500).json({
+            message: 'Failed to delete vehicle image',
+            error: err.message
+        });
+    }
+}
+
 module.exports = {
-    registerVehicle, getVehicle, getAllVehiclesByOwnerId, updateVehicle, deleteVehicle
+    registerVehicle, getVehicle, getAllVehiclesByOwnerId, updateVehicle, deleteVehicle, deleteVehicleImage
 };

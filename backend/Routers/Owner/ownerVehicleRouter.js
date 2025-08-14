@@ -10,5 +10,6 @@ router.get('/all', verifyOwnerToken, ownerVehicleController.getAllVehiclesByOwne
 router.get('/:id', verifyOwnerToken, ownerVehicleController.getVehicle);
 router.put('/:id', verifyOwnerToken, upload.array('vehicleImages', 5), ownerVehicleController.updateVehicle);
 router.delete('/:id', verifyOwnerToken, ownerVehicleController.deleteVehicle);
+router.delete('/:id/images/:imageId', verifyOwnerToken, ownerVehicleController.deleteVehicleImage);
 
 module.exports = router;
