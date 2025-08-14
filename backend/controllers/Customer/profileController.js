@@ -24,11 +24,20 @@ async function getProfile(req, res) {
 
 async function updateProfile(req, res) {
     try {
-        const { firstName, lastName, email, phoneNumber, dateOfBirth, driversLicense, emergencyContact, address } = req.body;
+        const { firstName, lastName, email, phoneNumber, dateOfBirth, driversLicense, emergencyContact, address, isNewsletterSubscribed } = req.body;
 
         let photoPath = null;
         if (req.file) {
             photoPath = `/uploads/customerProfiles/${req.file.filename}`;
+        }
+
+        // Get current customer
+        const currentCustomer = await Customer.findById(req.user.id);
+        if (!currentCustomer) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Customer not found' 
+            });
         }
 
         const updateData = {};
@@ -41,6 +50,20 @@ async function updateProfile(req, res) {
         if (driversLicense !== undefined) updateData.driversLicense = driversLicense;
         if (emergencyContact !== undefined) updateData.emergencyContact = emergencyContact;
         if (address !== undefined) updateData.address = address;
+
+        // Handle newsletter subscription update
+        if (isNewsletterSubscribed !== undefined) {
+            updateData.isNewsletterSubscribed = isNewsletterSubscribed;
+            
+            if (isNewsletterSubscribed && !currentCustomer.isNewsletterSubscribed) {
+                // User is subscribing
+                updateData.newsletterSubscribedAt = new Date();
+                updateData.newsletterUnsubscribedAt = null;
+            } else if (!isNewsletterSubscribed && currentCustomer.isNewsletterSubscribed) {
+                // User is unsubscribing
+                updateData.newsletterUnsubscribedAt = new Date();
+            }
+        }
 
         const updatedCustomer = await Customer.findByIdAndUpdate(
             req.user.id,

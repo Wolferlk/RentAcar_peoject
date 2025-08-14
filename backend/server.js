@@ -80,6 +80,9 @@ app.use('/api/customer/rental-history', rentalHistoryRouter);
 const vehicleRouter = require('./Routers/Customer/vehicleRouter');
 app.use('/api/customer/vehicle', vehicleRouter);
 
+const newsletter = require('./Routers/Customer/newsLetterRouter');
+app.use('/api/customer/newsletter', newsletter);
+
 // Owner Routers
 const ownerVehicleRouter = require('./Routers/Owner/ownerVehicleRouter');
 app.use('/api/owner/vehicle', ownerVehicleRouter)
