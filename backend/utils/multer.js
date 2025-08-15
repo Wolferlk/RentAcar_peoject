@@ -5,6 +5,7 @@ const fs = require('fs');
 // Create upload directory if it doesn't exist
 const vehicleImagesPath = path.join(__dirname, '../uploads/vehicles');
 const customerProfileImagesPath = path.join(__dirname, '../uploads/customerProfiles');
+const ownerProfileImagesPath = path.join(__dirname, '../uploads/ownerProfileImages');
 
 // Ensure directories exist
 if (!fs.existsSync(vehicleImagesPath)) {
@@ -12,6 +13,9 @@ if (!fs.existsSync(vehicleImagesPath)) {
 }
 if (!fs.existsSync(customerProfileImagesPath)) {
   fs.mkdirSync(customerProfileImagesPath, { recursive: true });
+}
+if (!fs.existsSync(ownerProfileImagesPath)) {
+  fs.mkdirSync(ownerProfileImagesPath, { recursive: true});
 }
 
 // For now configured only for vehicleImages, anyone can make necessary changes for their images accordingly
@@ -21,6 +25,8 @@ const storage = multer.diskStorage({
       cb(null, vehicleImagesPath);
     } else if (file.fieldname === 'customerProfileImage') {
       cb(null, customerProfileImagesPath);
+    } else if (file.fieldname === 'ownerProfileImage') {
+      cb(null, ownerProfileImagesPath);
     } else {
       cb(new Error('Invalid file field'), false);
     }

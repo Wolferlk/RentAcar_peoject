@@ -24,20 +24,9 @@ const ownerSchema = new mongoose.Schema({
         default: ''
     },
 
-    photo: {
+    image: {
         type: String,
         default: null
-    },
-
-    image: {
-        public_id: {
-            type: String,
-            default: null,
-        },
-        url: {
-            type: String,
-            default: null,
-        }
     },
 
     isApproved: {

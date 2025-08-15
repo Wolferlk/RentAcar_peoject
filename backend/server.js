@@ -90,6 +90,8 @@ app.use('/api/customer/dashboard', dashboard);
 const ownerVehicleRouter = require('./Routers/Owner/ownerVehicleRouter');
 app.use('/api/owner/vehicle', ownerVehicleRouter)
 
+const ownerProfileRouter = require('./Routers/Owner/ownerProfileRouter');
+app.use('/api/owner/profile', ownerProfileRouter);
 
 
 
