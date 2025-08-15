@@ -1,6 +1,6 @@
 const User = require('../../../Models/customerModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
-const { createToken, createRefreshToken, verifyRefreshToken, createResetToken, verifyResetToken } = require('../../../Utils/jwtUtil');
+const { createToken, createRefreshToken, verifyRefreshToken, createResetToken, verifyResetToken } = require('../../../utils/jwtUtil');
 const { sendPasswordResetEmail } = require('../../../config/nodemailerConfig');
 
 //Note: this is for to understand and make neccessory changes in this
