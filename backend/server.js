@@ -83,6 +83,9 @@ app.use('/api/customer/vehicle', vehicleRouter);
 const newsletter = require('./Routers/Customer/newsLetterRouter');
 app.use('/api/customer/newsletter', newsletter);
 
+const dashboard = require('./Routers/Customer/dashboardRouter');
+app.use('/api/customer/dashboard', dashboard);
+
 // Owner Routers
 const ownerVehicleRouter = require('./Routers/Owner/ownerVehicleRouter');
 app.use('/api/owner/vehicle', ownerVehicleRouter)

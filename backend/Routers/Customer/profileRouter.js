@@ -10,5 +10,6 @@ router.put('/', verifyCustomerToken,upload.single('customerProfileImage'), profi
 router.put('/photo', verifyCustomerToken, upload.single('customerProfileImage'), profileController.updateProfilePhoto);
 router.delete('/photo', verifyCustomerToken, profileController.deleteProfilePhoto);
 router.delete('/', verifyCustomerToken, profileController.deleteProfile);
+router.get('/with-stats', verifyCustomerToken, profileController.getProfileWithStats);
 
 module.exports = router;

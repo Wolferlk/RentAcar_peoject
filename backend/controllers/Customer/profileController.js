@@ -1,5 +1,8 @@
 const { model, get } = require('mongoose');
+const mongoose = require('mongoose');
 const Customer = require('../../Models/customerModel');
+const Booking = require('../../Models/bookingModel'); 
+const Favorite = require('../../Models/favoriteModel');
 const fs = require('fs');
 const path = require('path');
 
@@ -244,5 +247,57 @@ async function deleteProfile(req, res) {
         });
     }
 }
+async function getProfileWithStats(req, res) {
+    try {
+        const customerId = req.user.id;
 
-module.exports = { getProfile, updateProfile, deleteProfile, updateProfilePhoto, deleteProfilePhoto };
+        // Get customer profile
+        const customer = await Customer.findById(customerId).select('-password -refreshToken -resetPasswordToken');
+        if (!customer) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Customer not found' 
+            });
+        }
+
+        // Get quick stats
+        const [totalBookings, totalSpent, favoriteCount, upcomingTrips] = await Promise.all([
+            Booking.countDocuments({ customer: customerId }),
+            Booking.aggregate([
+                { $match: { customer: new mongoose.Types.ObjectId(customerId), bookingStatus: 'completed' } },
+                { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            ]),
+            Favorite.countDocuments({ customer: customerId }),
+            Booking.countDocuments({
+                customer: customerId,
+                bookingStatus: { $in: ['confirmed', 'pending'] },
+                pickupDate: { $gte: new Date() }
+            })
+        ]);
+
+        const profileData = {
+            ...customer.toObject(),
+            isGoogleUser: !!customer.googleId,
+            canChangePassword: !customer.googleId && !!customer.password,
+            quickStats: {
+                totalBookings,
+                totalSpent: totalSpent[0]?.total || 0,
+                favoriteCount,
+                upcomingTrips
+            }
+        };
+
+        res.status(200).json({
+            success: true,
+            data: profileData
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+}
+
+module.exports = { getProfile, updateProfile, deleteProfile, updateProfilePhoto, deleteProfilePhoto, getProfileWithStats };
