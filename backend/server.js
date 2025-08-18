@@ -91,8 +91,10 @@ const ownerVehicleRouter = require('./Routers/Owner/ownerVehicleRouter');
 app.use('/api/owner/vehicle', ownerVehicleRouter)
 
 const ownerProfileRouter = require('./Routers/Owner/ownerProfileRouter');
-app.use('/api/owner/profile', ownerProfileRouter);
+app.use('/api/owner/profile', ownerProfileRouter); 
 
+const ownerBookingRouter = require('./Routers/Owner/ownerBookingRouter');
+app.use('/api/owner/bookings', ownerBookingRouter);
 
 
 // Super Admin Routers  ( Company Dashboard )
