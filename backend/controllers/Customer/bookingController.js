@@ -5,15 +5,36 @@ exports.createBooking = async (req, res) => {
     try {
         const { vehicle, pickupLocation, dropoffLocation, pickupDate, dropoffDate, totalAmount } = req.body;
 
+        if (!req.files || 
+            !req.files.customerIdImage || 
+            !req.files.customerLicenseImage || 
+            req.files.customerIdImage.length < 2 || 
+            req.files.customerLicenseImage.length < 2) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please upload both front and back images of your ID and driving license'
+            });
+        }
+
+        const idDocumentPaths = req.files.customerIdImage.map(file => 
+            `/uploads/customerIdImage/${file.filename}`
+        );
+
+        const licenseDocumentPaths = req.files.customerLicenseImage.map(file => 
+            `/uploads/customerLicenseImage/${file.filename}`
+        );
+
         const newBooking = await Booking.create({
             customer: req.user.id,
             vehicle,
-            owner: req.body.owner,
+            owner: req.body.owner, 
             pickupLocation,
             dropoffLocation,
             pickupDate,
             dropoffDate,
-            totalAmount
+            totalAmount,
+            idDocument: idDocumentPaths,
+            drivingLicenseDocument: licenseDocumentPaths
         });
 
         return res.status(201).json({
