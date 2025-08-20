@@ -1,13 +1,14 @@
 const Booking = require("../../Models/bookingModel");
+const Vehicle = require("../../Models/vehicleModel");
 
 async function changeBookingStatus(req, res) {
     try{
         const {bookingId, bookingStatus} = req.params;
 
-        // Owner can only make a booking confrimed or cancelled
-        if (bookingStatus !== 'confirmed' && bookingStatus !== 'cancelled') {
+        // Owner can't make bookingStatus to pending
+        if (bookingStatus === 'pending') {
             return res.status(400).json({
-                message: 'Invalid booking status. Must be "confirmed" or "cancelled"'
+                message: 'Invalid booking status. Must be "confirmed", "cancelled" or "completed"'
             });
         }
 
@@ -33,6 +34,20 @@ async function changeBookingStatus(req, res) {
             })
         }
 
+        // Making vehicle unavailable upon booking confirmation & avaialable upon booking completion
+        if (bookingStatus === 'confirmed') {
+            await Vehicle.findByIdAndUpdate(
+                booking.vehicle, 
+                { isAvailable: false }
+            );
+        } else if (bookingStatus === 'completed') {
+            await Vehicle.findByIdAndUpdate(
+                booking.vehicle,
+                { isAvailable: true }
+            );
+        }
+
+        // Save the updated bookingStatus 
         booking.bookingStatus = bookingStatus;
         await booking.save();
 

@@ -10,6 +10,21 @@ const vehicleSchema = new mongoose.Schema({
         // false : Already rented  (taken by a customer)
         // if vehicle finished its rented perioud or check available vehicles, only this field will be use or update
     },
+    unavailableDates: [{
+        startDate: {
+            type: Date,
+            required: true
+        },
+        endDate: {
+            type: Date,
+            required: true
+        },
+        reason: {
+            type: String,
+            enum: ['booked', 'maintenance', 'owner_blocked'],
+            default: 'owner_blocked'
+        }
+    }],
     isApproved: {
         type: Boolean,
         default: false
