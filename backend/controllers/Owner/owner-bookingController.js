@@ -67,7 +67,7 @@ async function getAllBookings(req, res) {
     try{
         const ownerId = req.user.id;
         const bookings = await Booking.find({owner: ownerId })
-        .populate('vehicle')
+        .populate('vehicle', 'vehicleName vehicleLicenseNumber brand model year vehicleType')
         .populate('customer', 'firstName lastName email phoneNumber');
 
         return res.status(200).json({
@@ -90,11 +90,11 @@ async function getPendingBookings(req, res) {
         const bookings = await Booking.find({
             owner: ownerId,
             bookingStatus: 'pending'
-        }).populate('vehicle')
+        }).populate('vehicle', 'vehicleName vehicleLicenseNumber brand model year vehicleType')
         .populate('customer', 'firstName lastName email phoneNumber');
 
         return res.status(200).json({
-            message: 'All pending bookings successfull received.',
+            message: 'All pending bookings successfully received.',
             bookings
         });
 
@@ -107,8 +107,33 @@ async function getPendingBookings(req, res) {
     }
 }
 
+// To get all completed bookings
+async function getCompletedBookings(req, res) {
+    try{
+        const ownerId = req.user.id;
+        const bookings = await Booking.find({
+            owner: ownerId,
+            bookingStatus: 'completed'
+        }).populate('vehicle', 'vehicleName vehicleLicenseNumber brand model year vehicleType')
+        .populate('customer', 'firstName lastName email phoneNumber');
+
+        return res.status(200).json({
+            message: 'All completed bookings/rentals are successfully received.',
+            bookings
+        });
+
+    } catch (error) {
+        console.log('Error getting completed bookings for owner.', error);
+        return res.status(500).json({
+            message: 'Server error.',
+            error: error.message
+        });
+    }
+}
+
 module.exports = {
     changeBookingStatus,
     getAllBookings,
-    getPendingBookings
+    getPendingBookings,
+    getCompletedBookings
 }
