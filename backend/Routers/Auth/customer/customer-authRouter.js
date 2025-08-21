@@ -3,9 +3,6 @@ const passport = require('passport');
 const customerAuthController = require('../../../controllers/Auth/customer/customer-authController');
 const { verifyCustomerToken } = require('../../../middleware/Auth/verifyToken');
 
-// const {isSuperAdmin} = require('../../Middlewares/Auth/authorization')
-// const {verifyAdminToken} = require('../../Middlewares/Auth/verifyToken');
-
 // Public routes
 router.route('/register').post(customerAuthController.addUser);
 router.route('/login').post(customerAuthController.loginUser);
