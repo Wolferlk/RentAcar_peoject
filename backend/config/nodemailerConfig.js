@@ -2,6 +2,7 @@ const nodemailer = require("nodemailer");
 const setConfirmEmailBody = require('./confirmEmailbody');
 const setPasswordResetEmailBody = require('./resetPassEmailBody');
 const { setNewsletterWelcomeEmailBody, setNewsletterUnsubscribeEmailBody } = require('./newsLetterEmailBody');
+const setAdminNotificationEmailBody = require('./adminNotificationEmailBody');
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
@@ -24,13 +25,10 @@ async function sendEmail(to, subject, clientName, clientSubject, clientMassage, 
         };
 
         await transporter.sendMail(mailDetails);
-
-        return true
-
-
-
+        return true;
     } catch (error) {
         console.log("Failed to send email:", error);
+        return false; 
     }
 }
 
@@ -86,4 +84,21 @@ async function sendNewsletterUnsubscribeEmail(to, customerName, websiteLink) {
     }
 }
 
-module.exports = { sendEmail, sendPasswordResetEmail, sendNewsletterWelcomeEmail, sendNewsletterUnsubscribeEmail };
+async function sendAdminNotification(to, customerName, subject, message, customerEmail, customerPhone, websiteLink) {
+    try {
+        const mailDetails = {
+            from: process.env.APP_EMAIL,
+            to: to,
+            subject: `New ${subject} Message from ${customerName}`,
+            html: setAdminNotificationEmailBody(customerName, subject, message, customerEmail, customerPhone, websiteLink),
+        };
+
+        await transporter.sendMail(mailDetails);
+        return true;
+    } catch (error) {
+        console.log("Failed to send admin notification email:", error);
+        return false;
+    }
+}
+
+module.exports = { sendEmail, sendPasswordResetEmail, sendNewsletterWelcomeEmail, sendNewsletterUnsubscribeEmail, sendAdminNotification };
