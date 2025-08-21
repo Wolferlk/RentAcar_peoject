@@ -1,7 +1,6 @@
 const Favorite = require('../../Models/favoriteModel');
 
-exports.addToFavorites = async (req, res) => {
-    
+async function addToFavorites(req, res) {
     const { vehicleId } = req.body;
 
     try {
@@ -37,7 +36,7 @@ exports.addToFavorites = async (req, res) => {
 };
 
 
-exports.removeFromFavorites = async (req, res) => {
+async function removeFromFavorites(req, res) {
     const favoriteId = req.params.id;
 
     try {
@@ -66,7 +65,7 @@ exports.removeFromFavorites = async (req, res) => {
     }
 };
 
-exports.getFavorites = async (req, res) => {
+async function getFavorites(req, res) {
     try {
         const favorites = await Favorite.find({ customer: req.user.id })
             .populate('vehicle')
@@ -86,7 +85,7 @@ exports.getFavorites = async (req, res) => {
     }
 };
 
-exports.checkIfFavorited = async (req, res) => {
+async function checkIfFavorited(req, res) {
     const { vehicleId } = req.params;
 
     try {
@@ -109,3 +108,5 @@ exports.checkIfFavorited = async (req, res) => {
         });
     }
 };
+
+module.exports = { addToFavorites, removeFromFavorites, getFavorites, checkIfFavorited };

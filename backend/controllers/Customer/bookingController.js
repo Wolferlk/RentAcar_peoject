@@ -1,7 +1,7 @@
 const Booking = require('../../Models/bookingModel');
 const Vehicle = require('../../Models/vehicleModel');
 
-exports.createBooking = async (req, res) => {
+async function createBooking(req, res) {
     try {
         const { vehicle, pickupLocation, dropoffLocation, pickupDate, dropoffDate, totalAmount } = req.body;
 
@@ -51,7 +51,7 @@ exports.createBooking = async (req, res) => {
     }
 };
 
-exports.getCustomerBookings = async (req, res) => {
+async function getCustomerBookings(req, res) {
     try {
         const bookings = await Booking.find({ customer: req.user.id }).populate('vehicle').populate('owner');
         return res.status(200).json({
@@ -67,7 +67,7 @@ exports.getCustomerBookings = async (req, res) => {
     }
 };
 
-exports.cancelBooking = async (req, res) => {
+async function cancelBooking(req, res) {
     try {
         const booking = await Booking.findById(req.params.id);
 
@@ -96,7 +96,7 @@ exports.cancelBooking = async (req, res) => {
 };
 
 
-exports.getBookingById = async (req, res) => {
+async function getBookingById(req, res) {
     try {
         const booking = await Booking.findById(req.params.id).populate('vehicle').populate('owner');
 
@@ -127,3 +127,5 @@ exports.getBookingById = async (req, res) => {
         });
     }
 };
+
+module.exports = { createBooking, getCustomerBookings, getBookingById, cancelBooking };

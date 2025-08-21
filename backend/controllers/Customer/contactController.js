@@ -1,7 +1,7 @@
 const Contact = require('../../Models/contactModel');
 const { sendEmail, sendAdminNotification } = require('../../config/nodemailerConfig');
 
-exports.submitMessage = async (req, res) => {
+async function submitMessage(req, res) {
     try {
         const {firstName, lastName, emailAddress, phoneNumber, subject, message} = req.body;
 
@@ -104,7 +104,7 @@ exports.submitMessage = async (req, res) => {
     }
 };
 
-exports.getCustomerMessages = async (req, res) => {
+async function getCustomerMessages(req, res) {
     try {
         if (!req.user || !req.user.id) {
             return res.status(401).json({
@@ -128,3 +128,5 @@ exports.getCustomerMessages = async (req, res) => {
         });
     }
 };
+
+module.exports = { submitMessage, getCustomerMessages };
