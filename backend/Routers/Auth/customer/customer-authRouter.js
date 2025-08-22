@@ -6,7 +6,6 @@ const { verifyCustomerToken } = require('../../../middleware/Auth/verifyToken');
 // Public routes
 router.route('/register').post(customerAuthController.addUser);
 router.route('/login').post(customerAuthController.loginUser);
-router.route('/refresh').post(customerAuthController.refreshCustomerToken);
 
 // Password reset routes
 router.route('/forgot-password').post(customerAuthController.requestPasswordReset);
