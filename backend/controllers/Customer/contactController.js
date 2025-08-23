@@ -1,7 +1,7 @@
 const Contact = require('../../Models/contactModel');
-const sendEmail = require('../../config/nodemailerConfig');
+const { sendEmail, sendAdminNotification } = require('../../config/nodemailerConfig');
 
-exports.submitMessage = async (req, res) => {
+async function submitMessage(req, res) {
     try {
         const {firstName, lastName, emailAddress, phoneNumber, subject, message} = req.body;
 
@@ -41,32 +41,45 @@ exports.submitMessage = async (req, res) => {
         });
 
         try {
-            await sendEmail(
-                process.env.APP_EMAIL,
-                `New Contact Message from ${firstName}`,
+            const customerEmailSent = await sendEmail(
+                emailAddress, 
+                `We've Received Your Message - CarRent LK`,
                 firstName,
                 subject,
                 message,
                 process.env.WEBSITE_LINK
             );
-            console.log('Email sent successfully');
+            
+            if (customerEmailSent) {
+                console.log(`Confirmation email sent to customer: ${emailAddress}`);
+            } else {
+                console.log('Failed to send confirmation email to customer');
+            }
         } catch (emailError) {
             console.error('Email sending failed:', emailError);
         }
 
-        await sendEmail(
-            process.env.APP_EMAIL,
-            `New Contact Message from ${firstName}`,
-            firstName,
-            subject,
-            message,
-            process.env.WEBSITE_LINK
-        );
+        try {
+            const fullName = lastName ? `${firstName} ${lastName}` : firstName;
+            await sendAdminNotification(
+                process.env.APP_EMAIL,
+                fullName,
+                subject,
+                message,
+                emailAddress,
+                phoneNumber || null,
+                process.env.WEBSITE_LINK
+            );
+            console.log('Notification email sent to admin successfully');
+        } catch (adminEmailError) {
+            console.error('Admin notification email failed:', adminEmailError);
+        }
 
         const populatedMessage = await Contact.findById(newMessage._id)
             .populate('customer', 'firstName lastName email');
 
         return res.status(201).json({
+            success: true,
             message: "Message submitted successfully.",
             data: populatedMessage
         });
@@ -91,7 +104,7 @@ exports.submitMessage = async (req, res) => {
     }
 };
 
-exports.getCustomerMessages = async (req, res) => {
+async function getCustomerMessages(req, res) {
     try {
         if (!req.user || !req.user.id) {
             return res.status(401).json({
@@ -115,3 +128,5 @@ exports.getCustomerMessages = async (req, res) => {
         });
     }
 };
+
+module.exports = { submitMessage, getCustomerMessages };

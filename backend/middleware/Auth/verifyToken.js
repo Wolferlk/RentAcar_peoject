@@ -84,18 +84,19 @@ async function verifyCustomerToken(req, res, next) {
     const refreshToken = req.cookies[process.env.CUSTOMER_REFRESH_COOKIE_NAME];
 
     if (accessToken) {
-        try {
+        try{
             const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
             req.user = decoded;
             return next();
         } catch (error) {
+            // if access token invalid
             console.log("Customer's access token expired. Checking refresh token.");
         }
-    }
+    } 
 
     if (!refreshToken) {
         return res.status(401).json({
-            message: 'Access Denied. Please log in.'
+            message: 'Access Denied. Please Log in.'
         });
     }
 
@@ -121,7 +122,7 @@ async function verifyCustomerToken(req, res, next) {
             id: customer._id.toString(),
             email: customer.email,
             userRole: 'customer'
-        };
+        }
 
         const newAccessToken = createToken(payload);
         if (!newAccessToken) {
@@ -142,14 +143,14 @@ async function verifyCustomerToken(req, res, next) {
             id: customer._id.toString(),
             email: customer.email,
             userRole: 'customer'
-        };
+        }
 
-        console.log("Customer access token successfully refreshed.");
+        console.log("Customer Access token successfully refreshed.")
         next();
     } catch (error) {
         return res.status(401).json({
             message: 'Token refreshing error. Please log in again.'
-        });
+        })
     }
 }
 
@@ -219,7 +220,7 @@ async function verifyOwnerToken(req, res, next) {
             userRole: 'owner'
         }
 
-        console.log("Access token successfully refreshed.")
+        console.log("Owner Access token successfully refreshed.")
         next();
     } catch (error) {
         return res.status(401).json({

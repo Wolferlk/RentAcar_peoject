@@ -32,6 +32,14 @@ const bookingSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    idDocument: {
+        type: [String], 
+        required: true
+    },
+    drivingLicenseDocument: {
+        type: [String],
+        required: true
+    },
     totalAmount: {
         type: Number,
         required: true

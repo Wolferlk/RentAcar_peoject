@@ -1,5 +1,8 @@
 const { model, get } = require('mongoose');
+const mongoose = require('mongoose');
 const Customer = require('../../Models/customerModel');
+const Booking = require('../../Models/bookingModel'); 
+const Favorite = require('../../Models/favoriteModel');
 const fs = require('fs');
 const path = require('path');
 
@@ -24,11 +27,20 @@ async function getProfile(req, res) {
 
 async function updateProfile(req, res) {
     try {
-        const { firstName, lastName, email, phoneNumber, dateOfBirth, driversLicense, emergencyContact, address } = req.body;
+        const { firstName, lastName, email, phoneNumber, dateOfBirth, driversLicense, emergencyContact, address, isNewsletterSubscribed } = req.body;
 
         let photoPath = null;
         if (req.file) {
             photoPath = `/uploads/customerProfiles/${req.file.filename}`;
+        }
+
+        // Get current customer
+        const currentCustomer = await Customer.findById(req.user.id);
+        if (!currentCustomer) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Customer not found' 
+            });
         }
 
         const updateData = {};
@@ -41,6 +53,20 @@ async function updateProfile(req, res) {
         if (driversLicense !== undefined) updateData.driversLicense = driversLicense;
         if (emergencyContact !== undefined) updateData.emergencyContact = emergencyContact;
         if (address !== undefined) updateData.address = address;
+
+        // Handle newsletter subscription update
+        if (isNewsletterSubscribed !== undefined) {
+            updateData.isNewsletterSubscribed = isNewsletterSubscribed;
+            
+            if (isNewsletterSubscribed && !currentCustomer.isNewsletterSubscribed) {
+                // User is subscribing
+                updateData.newsletterSubscribedAt = new Date();
+                updateData.newsletterUnsubscribedAt = null;
+            } else if (!isNewsletterSubscribed && currentCustomer.isNewsletterSubscribed) {
+                // User is unsubscribing
+                updateData.newsletterUnsubscribedAt = new Date();
+            }
+        }
 
         const updatedCustomer = await Customer.findByIdAndUpdate(
             req.user.id,
@@ -221,5 +247,57 @@ async function deleteProfile(req, res) {
         });
     }
 }
+async function getProfileWithStats(req, res) {
+    try {
+        const customerId = req.user.id;
 
-module.exports = { getProfile, updateProfile, deleteProfile, updateProfilePhoto, deleteProfilePhoto };
+        // Get customer profile
+        const customer = await Customer.findById(customerId).select('-password -refreshToken -resetPasswordToken');
+        if (!customer) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Customer not found' 
+            });
+        }
+
+        // Get quick stats
+        const [totalBookings, totalSpent, favoriteCount, upcomingTrips] = await Promise.all([
+            Booking.countDocuments({ customer: customerId }),
+            Booking.aggregate([
+                { $match: { customer: new mongoose.Types.ObjectId(customerId), bookingStatus: 'completed' } },
+                { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            ]),
+            Favorite.countDocuments({ customer: customerId }),
+            Booking.countDocuments({
+                customer: customerId,
+                bookingStatus: { $in: ['confirmed', 'pending'] },
+                pickupDate: { $gte: new Date() }
+            })
+        ]);
+
+        const profileData = {
+            ...customer.toObject(),
+            isGoogleUser: !!customer.googleId,
+            canChangePassword: !customer.googleId && !!customer.password,
+            quickStats: {
+                totalBookings,
+                totalSpent: totalSpent[0]?.total || 0,
+                favoriteCount,
+                upcomingTrips
+            }
+        };
+
+        res.status(200).json({
+            success: true,
+            data: profileData
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+}
+
+module.exports = { getProfile, updateProfile, deleteProfile, updateProfilePhoto, deleteProfilePhoto, getProfileWithStats };

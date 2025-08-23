@@ -1,19 +1,40 @@
 const Booking = require('../../Models/bookingModel');
 const Vehicle = require('../../Models/vehicleModel');
 
-exports.createBooking = async (req, res) => {
+async function createBooking(req, res) {
     try {
         const { vehicle, pickupLocation, dropoffLocation, pickupDate, dropoffDate, totalAmount } = req.body;
+
+        if (!req.files || 
+            !req.files.customerIdImage || 
+            !req.files.customerLicenseImage || 
+            req.files.customerIdImage.length < 2 || 
+            req.files.customerLicenseImage.length < 2) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please upload both front and back images of your ID and driving license'
+            });
+        }
+
+        const idDocumentPaths = req.files.customerIdImage.map(file => 
+            `/uploads/customerIdImage/${file.filename}`
+        );
+
+        const licenseDocumentPaths = req.files.customerLicenseImage.map(file => 
+            `/uploads/customerLicenseImage/${file.filename}`
+        );
 
         const newBooking = await Booking.create({
             customer: req.user.id,
             vehicle,
-            owner: req.body.owner,
+            owner: req.body.owner, 
             pickupLocation,
             dropoffLocation,
             pickupDate,
             dropoffDate,
-            totalAmount
+            totalAmount,
+            idDocument: idDocumentPaths,
+            drivingLicenseDocument: licenseDocumentPaths
         });
 
         return res.status(201).json({
@@ -30,7 +51,7 @@ exports.createBooking = async (req, res) => {
     }
 };
 
-exports.getCustomerBookings = async (req, res) => {
+async function getCustomerBookings(req, res) {
     try {
         const bookings = await Booking.find({ customer: req.user.id }).populate('vehicle').populate('owner');
         return res.status(200).json({
@@ -46,7 +67,7 @@ exports.getCustomerBookings = async (req, res) => {
     }
 };
 
-exports.cancelBooking = async (req, res) => {
+async function cancelBooking(req, res) {
     try {
         const booking = await Booking.findById(req.params.id);
 
@@ -75,7 +96,7 @@ exports.cancelBooking = async (req, res) => {
 };
 
 
-exports.getBookingById = async (req, res) => {
+async function getBookingById(req, res) {
     try {
         const booking = await Booking.findById(req.params.id).populate('vehicle').populate('owner');
 
@@ -106,3 +127,5 @@ exports.getBookingById = async (req, res) => {
         });
     }
 };
+
+module.exports = { createBooking, getCustomerBookings, getBookingById, cancelBooking };

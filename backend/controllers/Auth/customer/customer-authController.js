@@ -1,10 +1,7 @@
 const User = require('../../../Models/customerModel');
 const { hashPassword, checkPassword } = require('../../../utils/bcryptUtil');
-const { createToken, createRefreshToken, verifyRefreshToken, createResetToken, verifyResetToken } = require('../../../Utils/jwtUtil');
+const { createToken, createRefreshToken, verifyRefreshToken, createResetToken, verifyResetToken } = require('../../../utils/jwtUtil');
 const { sendPasswordResetEmail } = require('../../../config/nodemailerConfig');
-
-//Note: this is for to understand and make neccessory changes in this
-
 
 // Signup   Direct Regiter
 async function addUser(req, res) {
@@ -146,63 +143,63 @@ async function loginUser(req, res) {
     }
 }
 
-async function refreshCustomerToken(req, res) {
-    try {
-        const refreshCookieName = process.env.CUSTOMER_REFRESH_COOKIE_NAME;
-        const refreshToken = req.cookies[refreshCookieName];
+// async function refreshCustomerToken(req, res) {
+//     try {
+//         const refreshCookieName = process.env.CUSTOMER_REFRESH_COOKIE_NAME;
+//         const refreshToken = req.cookies[refreshCookieName];
 
-        if (!refreshToken) {
-            return res.status(401).json({ message: 'Refresh token not found' });
-        }
+//         if (!refreshToken) {
+//             return res.status(401).json({ message: 'Refresh token not found' });
+//         }
 
-        // Verify the refresh token
-        const decoded = verifyRefreshToken(refreshToken);
-        if (!decoded || decoded.type !== 'refresh') {
-            return res.status(403).json({ message: 'Invalid refresh token' });
-        }
+//         // Verify the refresh token
+//         const decoded = verifyRefreshToken(refreshToken);
+//         if (!decoded || decoded.type !== 'refresh') {
+//             return res.status(403).json({ message: 'Invalid refresh token' });
+//         }
 
-        // Verify user exists and token matches
-        const user = await User.findById(decoded.id);
-        if (!user || user.refreshToken !== refreshToken) {
-            return res.status(403).json({ message: 'Invalid refresh token' });
-        }
+//         // Verify user exists and token matches
+//         const user = await User.findById(decoded.id);
+//         if (!user || user.refreshToken !== refreshToken) {
+//             return res.status(403).json({ message: 'Invalid refresh token' });
+//         }
 
-        // Create new tokens
-        const payload = {
-            id: user._id.toString(),
-            email: user.email,
-            userRole: user.userRole
-        };
+//         // Create new tokens
+//         const payload = {
+//             id: user._id.toString(),
+//             email: user.email,
+//             userRole: user.userRole
+//         };
 
-        const newAccessToken = createToken(payload);
-        const newRefreshToken = createRefreshToken(payload);
+//         const newAccessToken = createToken(payload);
+//         const newRefreshToken = createRefreshToken(payload);
 
-        // Update refresh token in database
-        await User.findByIdAndUpdate(user._id, { refreshToken: newRefreshToken });
+//         // Update refresh token in database
+//         await User.findByIdAndUpdate(user._id, { refreshToken: newRefreshToken });
 
-        const accessCookieName = process.env.CUSTOMER_COOKIE_NAME;
-        const newRefreshCookieName = process.env.CUSTOMER_REFRESH_COOKIE_NAME;
+//         const accessCookieName = process.env.CUSTOMER_COOKIE_NAME;
+//         const newRefreshCookieName = process.env.CUSTOMER_REFRESH_COOKIE_NAME;
 
-        res.cookie(accessCookieName, newAccessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict',
-            maxAge: 1000 * 60 * 15
-        });
+//         res.cookie(accessCookieName, newAccessToken, {
+//             httpOnly: true,
+//             secure: process.env.NODE_ENV === 'production',
+//             sameSite: 'Strict',
+//             maxAge: 1000 * 60 * 15
+//         });
 
-        res.cookie(newRefreshCookieName, newRefreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict',
-            maxAge: 1000 * 60 * 60 * 24 * 7
-        });
+//         res.cookie(newRefreshCookieName, newRefreshToken, {
+//             httpOnly: true,
+//             secure: process.env.NODE_ENV === 'production',
+//             sameSite: 'Strict',
+//             maxAge: 1000 * 60 * 60 * 24 * 7
+//         });
 
-        return res.status(200).json({ message: 'Token refreshed successfully' });
+//         return res.status(200).json({ message: 'Token refreshed successfully' });
 
-    } catch (error) {
-        return res.status(500).json({ message: 'Server Error', error: error.message });
-    }
-}
+//     } catch (error) {
+//         return res.status(500).json({ message: 'Server Error', error: error.message });
+//     }
+// }
 
 async function logoutUser(req, res) {
     
@@ -382,31 +379,46 @@ async function resetPassword(req, res) {
         const { token, newPassword, confirmPassword } = req.body;
 
         if (!token || !newPassword || !confirmPassword) {
-            return res.status(400).json({ message: "All fields are required" });
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required" 
+            });
         }
 
         if (newPassword !== confirmPassword) {
-            return res.status(400).json({ message: "Passwords do not match" });
+            return res.status(400).json({
+                success: false,
+                message: "Passwords do not match"
+            });
         }
 
         if (newPassword.length < 6) {
-            return res.status(400).json({message: 'Password must be at least 6 characters long'});
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 6 characters long'
+            });
         }
 
         // Verify the reset token
         const decoded = verifyResetToken(token);
         if (!decoded || decoded.type !== 'password_reset') {
-            return res.status(400).json({ message: "Invalid or expired token" });
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired token"
+            });
         }
 
         // Find the user by ID and update the password
-        const user = await User.findById({
+        const user = await User.findOne({
             _id: decoded.id,
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: new Date() }
         });
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
         }
 
         const hashedPassword = await hashPassword(newPassword);
@@ -433,4 +445,4 @@ async function resetPassword(req, res) {
     }
 }
 
-module.exports = { addUser, loginUser, refreshCustomerToken, logoutUser, findOrCreateGoogleUser, googleLoginUser, requestPasswordReset, resetPassword }
+module.exports = { addUser, loginUser, logoutUser, findOrCreateGoogleUser, googleLoginUser, requestPasswordReset, resetPassword }

@@ -1,6 +1,6 @@
 const Review = require('../../Models/reviewModel');
 
-exports.createReview = async (req, res) => {
+async function createReview(req, res) {
     try {
         const { vehicle, rating, comment } = req.body;
 
@@ -26,7 +26,7 @@ exports.createReview = async (req, res) => {
 };
 
 
-exports.getVehicleReviews = async (req, res) => {
+async function getVehicleReviews(req, res) {
     try {
         const reviews = await Review.find({ vehicle: req.params.vehicleId })
             .populate('customer', 'firstName email')
@@ -46,7 +46,7 @@ exports.getVehicleReviews = async (req, res) => {
     }
 };
 
-exports.deleteReview = async (req, res) => {
+async function deleteReview(req, res) {
     try {
         const review = await Review.findById(req.params.reviewId);
         if (!review || review.customer.toString() !== req.user.id) {
@@ -71,7 +71,7 @@ exports.deleteReview = async (req, res) => {
     }
 };
 
-exports.getCustomerReviews = async (req, res) => {
+async function getCustomerReviews(req, res) {
     try {
         const reviews = await Review.find({ customer: req.user.id })
             .populate('vehicle', 'brand model year')
@@ -92,7 +92,7 @@ exports.getCustomerReviews = async (req, res) => {
     }
 };
 
-exports.updateReview = async (req, res) => {
+async function updateReview(req, res) {
     try {
         const { reviewId } = req.params;
         const { rating, comment } = req.body;
@@ -141,3 +141,5 @@ exports.updateReview = async (req, res) => {
         });
     }
 };
+
+module.exports = { createReview, getVehicleReviews, deleteReview, getCustomerReviews, updateReview };

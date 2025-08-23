@@ -67,6 +67,18 @@ const customerSchema = new mongoose.Schema({
         type: String,
         default: 'customer'
     },
+    isNewsletterSubscribed: {
+        type: Boolean,
+        default: false
+    },
+    newsletterSubscribedAt: {
+        type: Date,
+        default: null
+    },
+    newsletterUnsubscribedAt: {
+        type: Date,
+        default: null
+    },
     refreshToken: {
         type: String,
         default: null

@@ -80,11 +80,21 @@ app.use('/api/customer/rental-history', rentalHistoryRouter);
 const vehicleRouter = require('./Routers/Customer/vehicleRouter');
 app.use('/api/customer/vehicle', vehicleRouter);
 
+const newsletter = require('./Routers/Customer/newsLetterRouter');
+app.use('/api/customer/newsletter', newsletter);
+
+const dashboard = require('./Routers/Customer/dashboardRouter');
+app.use('/api/customer/dashboard', dashboard);
+
 // Owner Routers
 const ownerVehicleRouter = require('./Routers/Owner/ownerVehicleRouter');
 app.use('/api/owner/vehicle', ownerVehicleRouter)
 
+const ownerProfileRouter = require('./Routers/Owner/ownerProfileRouter');
+app.use('/api/owner/profile', ownerProfileRouter); 
 
+const ownerBookingRouter = require('./Routers/Owner/ownerBookingRouter');
+app.use('/api/owner/bookings', ownerBookingRouter);
 
 
 // Super Admin Routers  ( Company Dashboard )
